@@ -13,6 +13,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.project.cureconnect.login.LoginUiState
+import com.project.cureconnect.pateints.Constant.razorpay
 import com.project.cureconnect.pateints.cardScreens.appoinmenet.Appointment
 import com.project.cureconnect.pateints.cardScreens.appoinmenet.Doctor
 import com.razorpay.Checkout
@@ -45,7 +46,7 @@ class PaymentViewModel : ViewModel(), PaymentResultListener {
             val checkout = Checkout()
 
             // IMPORTANT: Replace with your actual Razorpay key
-            checkout.setKeyID("rzp_test_xoTUlKDCLd07l6")
+            checkout.setKeyID(razorpay.api)
 
             val options = JSONObject().apply {
                 put("name", "CureConnect")
