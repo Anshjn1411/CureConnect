@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <string name="app_name">क्योरकनेक्ट</string>
+    <string name="default_web_client_id">161412601921-cc9gdvhn7f119jt2eorpj35tmqjvog49.apps.googleusercontent.com</string>
+    <string name="our_service">आमच्या सेवा</string>
+    <string name="Telemedicine">टेलिमेडिसिन</string>
+    <string name="Analysis">विश्लेषण</string>
+    <string name="Health_Tips">आरोग्य टिप्स</string>
+    <string name="Consult">सल्ला</string>
+    <string name="Emergency">आपत्कालीन</string>
+    <string name="Appointment">नियुक्ती</string>
+    <string name="Dr_Sarah_Wilson">डॉ. सारा विल्सन</string>
+    <string name="Cardiologist">हृदयविकार तज्ज्ञ</string>
+
+    <string name="Dr_James_Chen">डॉ. जेम्स चेन</string>
+    <string name="Neurologist">मस्तिष्क तज्ज्ञ</string>
+
+    <string name="Dr_Maria_Garcia">डॉ. मारिया गार्सिया</string>
+    <string name="Pediatrician">बालरोग तज्ज्ञ</string>
+
+    <string name="Dr_Robert_Lee">डॉ. रॉबर्ट ली</string>
+    <string name="Dermatologist">त्वचारोग तज्ज्ञ</string>
+    <string name="Our_pecialist_Doctors">आमचे विशेषज्ञ डॉक्टर</string>
+    <string name="Book_Now">आता बुक करा</string>
+
+    <string name="Heart_Rate">हृदय गती</string>
+    <string name="Steps">पावले</string>
+    <string name="Sleep">झोप</string>
+    <string name="Water">पाणी</string>
+    <string name="Heart_Disease_Prevention">हृदय रोग प्रतिबंधाबाबत नवीन संशोधन</string>
+    <string name="Covid_Booster_Info">कोविड-१९ बूस्टर: तुम्हाला काय माहित असावे</string>
+    <string name="Diabetes_Breakthrough">मधुमेह उपचारातील प्रगती</string>
+
+    <string name="Health_Today">आजचे आरोग्य</string>
+    <string name="Medical_Journal">वैद्यकीय जर्नल</string>
+    <string name="Science_Daily">विज्ञान दैनिक</string>
+
+    <string name="Three_Hours_Ago">३ तासांपूर्वी</string>
+    <string name="One_Day_Ago">१ दिवसापूर्वी</string>
+    <string name="Two_Days_Ago">२ दिवसांपूर्वी</string>
+    <string name="Your_Health_Stats">तुमचे आरोग्य सांख्यिकी</string>
+    <string name="See_More_Health_News">अधिक आरोग्य बातम्या पहा</string>
+    <string name="Emily_Johnson">एमिली जॉन्सन</string>
+    <string name="Michael_Brown">मायकेल ब्राऊन</string>
+    <string name="Jessica_Lee">जेसिका ली</string>
+
+    <string name="One_Week_Ago">१ आठवडा पूर्वी</string>
+    <string name="Three_Days_Ago">३ दिवसांपूर्वी</string>
+
+    <string name="Telemedicine_Feedback">टेलिमेडिसिन सेवेमुळे मला खूप वेळ वाचवता आला. डॉ. विल्सन खूप व्यावसायिक आणि मदतगार होते!</string>
+    <string name="Appointment_Feedback">जलद अपॉइंटमेंट बुकिंग आणि उत्कृष्ट सल्ला. अत्यंत शिफारस करतो!</string>
+    <string name="Health_Tips_Feedback">आरोग्य टिप्स विभाग माझ्या मधुमेह नियंत्रणासाठी खूप उपयुक्त ठरला आहे.</string>
+    <string name="What_Our_Users_Say">"आमचे वापरकर्ते काय म्हणतात"</string>
+</resources>

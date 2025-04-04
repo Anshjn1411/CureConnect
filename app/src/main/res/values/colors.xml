@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="lightgreen">#FFFFFF</color>
+    <!-- Main colors -->
+    <color name="background">#F8F9FA</color>
+    <color name="text_primary">#000000</color>
+    <color name="text_secondary">#757575</color>
+    <color name="card_background">#FFFFFF</color>
+
+    <!-- Theme colors -->
+    <color name="primary_blue">#2962FF</color>
+    <color name="primary_blue_light">#768FFF</color>
+    <color name="primary_blue_dark">#0039CB</color>
+
+    <!-- Category colors -->
+    <color name="daily_habits">#2962FF</color>      <!-- Blue -->
+    <color name="nutrition">#AB47BC</color>         <!-- Purple -->
+    <color name="fitness">#66BB6A</color>           <!-- Green -->
+    <color name="rest">#7986CB</color>              <!-- Indigo -->
+    <color name="mental_health">#F44336</color>     <!-- Red -->
+    <color name="misc">#FFB300</color>              <!-- Amber -->
+
+    <!-- UI colors -->
+    <color name="divider">#E0E0E0</color>
+    <color name="shadow">#20000000</color>
+    <color name="ripple">#33000000</color>
+</resources>

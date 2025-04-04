@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "161412601921",
+    "project_id": "cureconnect-23b79",
+    "storage_bucket": "cureconnect-23b79.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:161412601921:android:8bc1e85b68c18383f88ec0",
+        "android_client_info": {
+          "package_name": "com.project.cureconnect"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6YCLjIklyzFKi_Sdu4BB7uToAgo-LiAI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

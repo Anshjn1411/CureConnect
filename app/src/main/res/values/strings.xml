@@ -1,0 +1,56 @@
+<resources>
+    <string name="app_name">CureConnect</string>
+    <string name="default_web_client_id">161412601921-cc9gdvhn7f119jt2eorpj35tmqjvog49.apps.googleusercontent.com</string>
+    <string name="our_service">Our Services</string>
+    <string name="Telemedicine">Telemedicine</string>
+    <string name="Analysis">Analysis</string>
+    <string name="Health_Tips">Health Tips</string>
+    <string name="Consult">Consult</string>
+    <string name="Emergency">Emergency</string>
+    <string name="Appointment">Appointment</string>
+    <string name="Dr_Sarah_Wilson">Dr. Sarah Wilson</string>
+    <string name="Cardiologist">Cardiologist</string>
+
+    <string name="Dr_James_Chen">Dr. James Chen</string>
+    <string name="Neurologist">Neurologist</string>
+
+    <string name="Dr_Maria_Garcia">Dr. Maria Garcia</string>
+    <string name="Pediatrician">Pediatrician</string>
+
+    <string name="Dr_Robert_Lee">Dr. Robert Lee</string>
+    <string name="Dermatologist">Dermatologist</string>
+    <string name="Our_pecialist_Doctors">Our Specialist Doctors</string>
+    <string name="Book_Now">Book Now</string>
+
+    <string name="Heart_Rate">Heart Rate</string>
+    <string name="Steps">Steps</string>
+    <string name="Sleep">Sleep</string>
+    <string name="Water">Water</string>
+    <string name="Heart_Disease_Prevention">New Research on Heart Disease Prevention</string>
+    <string name="Covid_Booster_Info">COVID-19 Booster: What You Need to Know</string>
+    <string name="Diabetes_Breakthrough">Breakthrough in Diabetes Treatment</string>
+
+    <string name="Health_Today">Health Today</string>
+    <string name="Medical_Journal">Medical Journal</string>
+    <string name="Science_Daily">Science Daily</string>
+
+    <string name="Three_Hours_Ago">3 hours ago</string>
+    <string name="One_Day_Ago">1 day ago</string>
+    <string name="Two_Days_Ago">2 days ago</string>
+    <string name="Your_Health_Stats">Your Health Stats</string>
+    <string name="See_More_Health_News">See More Health News</string>
+    <string name="Emily_Johnson">Emily Johnson</string>
+    <string name="Michael_Brown">Michael Brown</string>
+    <string name="Jessica_Lee">Jessica Lee</string>
+
+    <string name="One_Week_Ago">1 week ago</string>
+    <string name="Three_Days_Ago">3 days ago</string>
+
+    <string name="Telemedicine_Feedback">The telemedicine service saved me so much time. Dr. Wilson was very professional and helpful!</string>
+    <string name="Appointment_Feedback">Quick appointment booking and excellent consultation. Highly recommended!</string>
+    <string name="Health_Tips_Feedback">The health tips section has been incredibly useful for managing my diabetes.</string>
+    <string name="What_Our_Users_Say">"What Our Users Say"</string>
+
+
+
+</resources>
