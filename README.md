@@ -29,7 +29,7 @@ CureConnect is a next-gen AI-powered telemedicine platform designed to bring acc
 
 ### 4. RAG-Powered AI Chatbot 🤖
 
-![Chatbot]
+![Chatbot](app/src/main/res/drawable/bot.png)
 ![Health Tips](app/src/main/res/drawable/ht.png)
 
 - Uses Retrieval-Augmented Generation (RAG) to provide context-aware, accurate health responses.
