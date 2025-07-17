@@ -1,4 +1,5 @@
 package com.project.cureconnect.pateints.mainScreens
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -41,37 +42,38 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.project.cureconnect.R
-import com.project.cureconnect.login.UserModel
-import com.project.cureconnect.pateints.navigationRoutes.Screen
 
-import login.AuthViewModel
+import com.project.cureconnect.data.datastore.UserSessionLayer.CachedUser
+import com.project.cureconnect.data.datastore.UserSessionLayer.UserSessionManager
+import com.project.cureconnect.pateints.navigationRoutes.Screen
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 @Composable
 fun ProfileScreen(
-    navController: NavController,
-    authViewModel: AuthViewModel = viewModel()
-) {var selectedItem by remember { mutableStateOf(3) }
-    val isAuthenticated by authViewModel.isAuthenticated.collectAsState()
-    var userData by remember { mutableStateOf<UserModel?>(null) }
+    navController: NavController
+) {
     val context = LocalContext.current
+    val sessionManager = remember { UserSessionManager(context) }
 
-    // Fetch user data when the screen is first displayed
+    var selectedItem by remember { mutableStateOf(3) }
+    var cachedUser by remember { mutableStateOf<CachedUser?>(null) }
+
+    // Observe cached user from DataStore
     LaunchedEffect(Unit) {
-        authViewModel.getUserData { user ->
-            userData = user
+        sessionManager.userData.collect { user ->
+            cachedUser = user
         }
-    }
-
-    // Handle sign out navigation
-    LaunchedEffect(isAuthenticated) {
-        if (!isAuthenticated) {
-            // Navigate to SignIn screen using your Screen sealed class
-            navController.navigate(Screen.WelcomeScreen.routes) {
+        Log.d("ProfileScreen", "Cached user: $cachedUser")
+        if (cachedUser == null) {
+            navController.navigate(Screen.WelcomeScreen1.routes) {
                 popUpTo(0)
             }
         }
     }
+
 
     Scaffold(
         bottomBar = { MainBottomBar(navController = navController , selectedItem = selectedItem){index->
@@ -104,7 +106,7 @@ fun ProfileScreen(
             }
 
             Text(
-                text = userData?.name ?: "Loading...",
+                text = cachedUser?.name ?: "Loading...",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 16.dp)
@@ -143,7 +145,8 @@ fun ProfileScreen(
                     ProfileMenuItem(
                         icon = R.drawable.cureconnect_logo,
                         title = "History",
-                        onClick = { navController.navigate("history/${userData?.name}") }
+                        onClick = { navController.navigate("history")
+                             }
                     )
                 }
                 item {
@@ -176,7 +179,10 @@ fun ProfileScreen(
                         title = "Logout",
                         onClick = {
                             // Just call signOut() - the LaunchedEffect will handle navigation
-                            authViewModel.signOut()
+                            // Clear session data (logout)
+                            CoroutineScope(Dispatchers.IO).launch {
+                                sessionManager.clearUser()
+                            }
                         }
                     )
                 }

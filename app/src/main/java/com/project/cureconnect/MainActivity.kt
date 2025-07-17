@@ -22,14 +22,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
-import com.project.cureconnect.DoctorPanel.MainDashBorad.DoctorAppointmentsScreen
-import com.project.cureconnect.DoctorPanel.MainDashBorad.DoctorDashBoard
-import com.project.cureconnect.pateints.navigationRoutes.Navigation
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+
 
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.project.cureconnect.pateints.navigationRoutes.AppHost
 import java.util.Locale
 
 import com.project.cureconnect.ui.theme.CureConnectTheme
@@ -49,7 +46,7 @@ class MainActivity : ComponentActivity() , PaymentResultListener {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
                         //LanguageSelector()  // Add language selector
-                        Navigation()
+                        AppHost(navController = rememberNavController())
                     }
                 }
             }
@@ -66,30 +63,7 @@ class MainActivity : ComponentActivity() , PaymentResultListener {
     }
 }
 
-@Composable
-fun LanguageSelector() {
-    val context = LocalContext.current
-    val languages = listOf("English", "हिन्दी")
-    var selectedLanguage by remember { mutableStateOf(languages[0]) }
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text(text = "Select Language", style = MaterialTheme.typography.bodyLarge)
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        languages.forEach { language ->
-            Button(
-                onClick = {
-                    selectedLanguage = language
-                    changeLanguage(context, if (language == "English") "en" else "hi")
-                },
-                modifier = Modifier.padding(4.dp)
-            ) {
-                Text(text = language)
-            }
-        }
-    }
-}
 
 fun changeLanguage(context: Context, language: String) {
     val locale = Locale(language)

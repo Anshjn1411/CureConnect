@@ -4,8 +4,8 @@ object ApiKeys{
     val emergencynumber = "" // IVR NUMBER
 }
 object emailSMPT {
-    val email = "" // SMTP Email
-    val password = "" // Pass
+    val email = "cureconnect0@gmail.com" // SMTP Email
+    val password = "ieys zsgf bvgn sarr" // Pass
 }
 object TwilioCredential{
     val ACCOUNT_SID = ""
@@ -16,5 +16,10 @@ object firebase{
     val webGoogleToken= ""
 }
 object razorpay{
-    val api= ""  // Razorpay APi
+    val api= "rzp_test_xoTUlKDCLd07l6"  // Razorpay APi
+}
+object cloudinary{
+    val cloud_name = "ds43vscit"  // Cloudinary Name
+    val api_key = "852227254144386"  // Cloudinary Api Key
+    val api_secret = "eUgehcz8shrlKevt6PP9SWdKh2k"  // Cloudinary Api Secret
 }

@@ -1,4 +1,4 @@
-package com.project.cureconnect.pateints.Api
+package com.project.cureconnect.data.api.Api
 
 data class jsonModel(
     val prediction: String,

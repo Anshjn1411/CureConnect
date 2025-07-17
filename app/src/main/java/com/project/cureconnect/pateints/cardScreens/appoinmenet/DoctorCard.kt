@@ -37,7 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.project.cureconnect.R
-import com.zego.ve.Log
+
 
 @Composable
 fun DoctorCard(doctor: Doctor, onDoctorClick: () -> Unit) {

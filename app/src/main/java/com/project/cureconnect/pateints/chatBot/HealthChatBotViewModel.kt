@@ -62,22 +62,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-
-import com.project.cureconnect.R
-import com.project.cureconnect.login.UserModel
-import com.project.cureconnect.pateints.Api.RetrofitInstance
+import com.google.ai.client.generativeai.GenerativeModel
+import com.google.ai.client.generativeai.type.content
+import com.project.cureconnect.login.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.RequestBody
-import org.json.JSONArray
-import org.json.JSONObject
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import kotlinx.serialization.json.JsonNull.content
+
+
 data class ChatMessage(
     val id: String,
     val content: String,
@@ -89,8 +84,12 @@ class HealthChatBotViewModel : ViewModel() {
     private val _messages = MutableStateFlow<List<ChatMessage>>(listOf())
     val messages: StateFlow<List<ChatMessage>> = _messages.asStateFlow()
 
+    private val generativeModel = GenerativeModel(
+        modelName = "gemini-1.5-flash",
+        apiKey = "AIzaSyASSY9fkUZY2Q9cYsCd-mTMK0sr98lPh30" // Replace this with your API key securely
+    )
+
     init {
-        // Add welcome message
         _messages.value = listOf(
             ChatMessage(
                 id = "welcome",
@@ -100,92 +99,58 @@ class HealthChatBotViewModel : ViewModel() {
         )
     }
 
-    fun sendMessage(context: Context, message: String, user: UserModel) {
-        // Don't send empty messages
+    fun sendMessage(context: Context, message: String, user: User) {
         if (message.isBlank()) return
 
-        // Add user message to the chat
         val userMessage = ChatMessage(
             id = System.currentTimeMillis().toString(),
             content = message,
             isFromBot = false
         )
-
-        // Update the messages list with the user's message
         _messages.value = _messages.value + userMessage
 
-        val payload = JSONObject().apply {
-            put("prompt", message)
-            put("user_data", JSONObject().apply {
-                put("name", user.name ?: "Guest")
-                put("medical_history", user?.medicalHistory ?: "No medical history available")
-                put("age", user.age ?: "Unknown")
+        val fullPrompt = buildPrompt(user, message)
 
-                // Ensure `conditions` is a proper list before converting to JSONArray
-                val conditionsList = user.conditions
-                put("conditions", JSONArray(conditionsList?.map { it.toString() }))
-
-                // Ensure `medications` is a proper list before converting to JSONArray
-                val medicationsList = user.medications
-                put("medications", JSONArray(medicationsList?.map { it.toString() }))
-            })
-        }
-
-        val requestBody = RequestBody.create("application/json".toMediaTypeOrNull(), payload.toString())
-
-        viewModelScope.launch(Dispatchers.Main) {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
-                val response = RetrofitInstance.responsechat.uploadprompt(requestBody)
-                if (response.isSuccessful) {
-                    response.body()?.let { responseBody ->
-                        // Extract the actual content from the responseBody
-                        // This assumes your response has a structure like {"response": "actual content"}
-                        // Adjust this parsing based on your actual response structure
-                        val responseString = responseBody.toString()
-                        val content = try {
-                            // Try to extract content from the response format
-                            if (responseString.contains("response=")) {
-                                responseString.substringAfter("response=").trim()
-                                    .removeSurrounding("chatmodel(", ")")
-                                    .substringAfter("response=")
-                                    .removeSurrounding("\"")
-                            } else {
-                                // Fallback to using the whole response
-                                responseString
-                            }
-                        } catch (e: Exception) {
-                            // If parsing fails, use the entire response
-                            responseString
-                        }
+                val response = generativeModel.generateContent(fullPrompt)
 
-                        val botReply = ChatMessage(
-                            id = System.currentTimeMillis().toString(),
-                            content = content,
-                            isFromBot = true
-                        )
-                        _messages.value = _messages.value + botReply
-                        Log.d("chatbot", "Response: $responseBody")
-                    }
-                } else {
-                    // Handle error by showing an error message in the chat
-                    val errorMessage = ChatMessage(
-                        id = System.currentTimeMillis().toString(),
-                        content = "Sorry, I couldn't process your request. Please try again later.",
-                        isFromBot = true
-                    )
-                    _messages.value = _messages.value + errorMessage
-                    Log.d("chatbot", "Error Response: ${response.errorBody()?.string()}")
-                }
-            } catch (e: Exception) {
-                // Show error message in chat
-                val errorMessage = ChatMessage(
+                val replyText = response.text ?: "Sorry, I couldn't understand. Please try again."
+
+                val botReply = ChatMessage(
                     id = System.currentTimeMillis().toString(),
-                    content = "Sorry, there was a problem connecting. Please check your connection and try again.",
+                    content = replyText,
                     isFromBot = true
                 )
-                _messages.value = _messages.value + errorMessage
-                Log.d("chatbot", "Exception: ${e.message}")
+
+                _messages.value = _messages.value + botReply
+            } catch (e: Exception) {
+                val errorReply = ChatMessage(
+                    id = System.currentTimeMillis().toString(),
+                    content = "Something went wrong. Please try again.",
+                    isFromBot = true
+                )
+                _messages.value = _messages.value + errorReply
             }
         }
+
+    }
+
+    private fun buildPrompt(user: User, question: String): String {
+        val name = user.name ?: "User"
+        val age = user.age ?: "Unknown"
+
+
+        return """
+            You are HealthBot, an intelligent and friendly AI healthcare assistant. You help users by answering questions, explaining symptoms, suggesting healthy practices, and guiding them on wellness topics.
+
+            Patient Name: $name
+            Age: $age
+
+            User's Message:
+            "$question"
+
+            Respond clearly and empathetically, based on the user's context.
+        """.trimIndent()
     }
 }

@@ -29,16 +29,15 @@ class AppoinmenetViewModel : ViewModel() {
 
     fun cancelAppointment(appointment: Appointment, onComplete: (Boolean) -> Unit) {
         val db = FirebaseFirestore.getInstance()
-
         db.collection("appointments").document(appointment.id)
             .delete()
             .addOnSuccessListener {
                 Log.d("Firestore", "Appointment canceled successfully.")
-                onComplete(true) // Notify UI that deletion was successful
+                onComplete(true)
             }
             .addOnFailureListener { e ->
                 Log.e("Firestore", "Error canceling appointment: ${e.message}")
-                onComplete(false) // Notify UI that deletion failed
+                onComplete(false)
             }
     }
 
@@ -93,8 +92,58 @@ fun sendCustomEmail(email: String, subject: String, body: String) {
 }
 
 
+fun fetchDoctorsFromFirestore(onResult: (List<Doctor>) -> Unit) {
+    val db = FirebaseFirestore.getInstance()
+    db.collection("doctors").get()
+        .addOnSuccessListener { result ->
+            Log.d("Doctor", "doctors fetched successfully")
+            val doctorsList = result.documents.mapNotNull { it.toObject(Doctor::class.java) }
+            onResult(doctorsList)
+        }
+        .addOnFailureListener { e ->
+            println("Error fetching doctors: ${e.message}")
+        }
+}
+fun fetchAppointmentByIDFromFirestore(Id :String , onResult: (List<Appointment>) -> Unit) {
+    val db = FirebaseFirestore.getInstance()
+    db.collection("appointments")
+        .whereEqualTo("patientId", Id) // Fetch only appointments where patientId = 1
+        .get()
+        .addOnSuccessListener { result ->
+            Log.d("Appointment", "Appointments fetched successfully")
+            val appointmentList = result.documents.mapNotNull { it.toObject(Appointment::class.java) }
+            onResult(appointmentList)
+        }
+        .addOnFailureListener { e ->
+            Log.e("Appointment", "Error fetching appointments: ${e.message}")
+        }
+}
 
 
+
+fun bookAppointment(appointment: Appointment) {
+    val db = FirebaseFirestore.getInstance()
+
+    val appointmentMap = hashMapOf(
+        "id" to appointment.id,
+        "doctorId" to appointment.doctorId,
+        "patientId" to appointment.patientId,
+        "date" to appointment.date,
+        "time" to appointment.time,
+        "status" to appointment.status,
+        "patienHistory" to appointment.patientHistoryRecord
+    )
+
+    db.collection("appointments")
+        .document(appointment.id)
+        .set(appointmentMap)
+        .addOnSuccessListener {
+            Log.d("Appointment", "Appointment booked successfully!")
+        }
+        .addOnFailureListener { e ->
+            Log.e("Appointment", "Failed to book appointment", e)
+        }
+}
 
 
 

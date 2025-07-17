@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
-
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.0"
 
 }
 
@@ -67,19 +67,18 @@ android {
 
 dependencies {
 
+    implementation("org.jitsi.react:jitsi-meet-sdk:8.1.2"){
+        isTransitive = true
+    }
+    // DataStore Preferences
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+
+
     implementation ("com.razorpay:checkout:1.6.40")
-
-
-        //implementation ("com.google.cloud:google-cloud-translate:2.0.0")
-
-
-
     implementation ("com.itextpdf:itextpdf:5.5.13.3")
-    //implementation ("com.github.barteksc:android-pdf-viewer:2.8.2")
-
-
     implementation("com.twilio.sdk:twilio:9.1.1")
-
     implementation ("com.google.android.gms:play-services-auth:20.7.0")
     implementation(libs.play.services.nearby)
     // Material Icons
@@ -90,10 +89,6 @@ dependencies {
         exclude (group= "javax.activation", module= "activation")
     }
     implementation("com.sun.mail:android-activation:1.6.7")
-
-
-
-    implementation("com.github.ZEGOCLOUD:zego_uikit_prebuilt_call_android:+")
     implementation("com.guolindev.permissionx:permissionx:1.8.0")
     // Firebase
     implementation("com.google.firebase:firebase-auth-ktx:22.1.2")
@@ -124,7 +119,11 @@ dependencies {
     // Kotlin Coroutines (Asynchronous Programming)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
+    // Google Generative AI (Gemini API)
+    implementation ("com.google.ai.client.generativeai:generativeai:0.2.0")
 
+    // For image processing and bitmap handling
+    implementation ("androidx.exifinterface:exifinterface:1.3.7")
     // AndroidX Core Libraries
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

@@ -1,16 +1,23 @@
 package com.project.cureconnect.pateints.cardScreens.analysis
 
+import android.content.Context
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -28,8 +36,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.firestore.FirebaseFirestore
+import com.project.cureconnect.login.AuthViewModel
+import com.project.cureconnect.data.datastore.UserSessionLayer.CachedUser
+import com.project.cureconnect.data.datastore.UserSessionLayer.UserSessionManager
 import com.project.cureconnect.pateints.cardScreens.analysis.Sampledataana.analyses
-import login.AuthViewModel
 
 // Data class to represent each analysis card
 data class AnalysisItem(
@@ -48,6 +58,7 @@ fun AnalysisCard(
      navController: NavController,
     Id : String,
     modifier: Modifier = Modifier,
+
 ) {
     Card(
         modifier = modifier
@@ -101,7 +112,8 @@ fun AnalysisCard(
 
             // Start Analysis Button
             Button(
-                onClick = { navController.navigate("ananyisis/${analysis.id}") },
+                onClick = {
+                    navController.navigate("analysis/${analysis.id}") },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = analysis.color.copy(alpha = 0.1f),
@@ -119,45 +131,46 @@ fun AnalysisCard(
 
 @Composable
 fun MedicalAnalysisDashboard(navController: NavController) {
-    val viewModel :AuthViewModel = viewModel()
+    val context : Context = LocalContext.current
+    val sessionManager = remember { UserSessionManager(context) }
+
     var id by remember { mutableStateOf("") }
-    viewModel.getUserData { user ->
-        id = user?.userId.toString()
+    var cachedUser by remember { mutableStateOf<CachedUser?>(null) }
+
+    // Observe cached user from DataStore
+    LaunchedEffect(Unit) {
+        sessionManager.userData.collect { user ->
+            cachedUser = user
+        }
     }
 
-
-
-    // List of analysis items
 
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(1),
-            contentPadding = PaddingValues(8.dp)
-        ) {
-            item {
+
                 ExtraArea(navController)
-                Spacer(Modifier.height(20.dp))
-            }
-            items(analyses) { analysis ->
-                AnalysisCard(analysis , navController , id  )
-            }
+
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(1),
+                    contentPadding = PaddingValues(8.dp)
+                ) {
+                    items(analyses) { analysis ->
+                        AnalysisCard(analysis, navController, id)
+                    }
+                }
+
+
         }
+
+
     }
 
 
-}
 
-// Example of how to use in a Compose Activity
-@Preview(showBackground = true)
-@Composable
-fun MedicalAnalysisDashboardPreview() {
-    MaterialTheme {
-        MedicalAnalysisDashboard(navController = rememberNavController())
-    }
-}
+
+
 object Sampledataana{
     val analyses = listOf(
         AnalysisItem(

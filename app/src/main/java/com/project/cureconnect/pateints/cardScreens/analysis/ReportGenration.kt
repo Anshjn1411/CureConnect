@@ -3,25 +3,13 @@ package com.project.cureconnect.pateints.cardScreens.analysis
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.pdf.PdfDocument
-import android.os.Environment
-import android.util.Log
-import androidx.core.content.FileProvider
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.google.firebase.firestore.FirebaseFirestore
-import com.itextpdf.text.*
-import com.itextpdf.text.pdf.PdfWriter
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
-import login.AuthViewModel
 import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 
-import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Typeface
 import com.project.cureconnect.R
@@ -29,18 +17,21 @@ import com.project.cureconnect.R
 import java.util.Date
 import java.util.Locale
 
-class EcgReportGenerator {
+class ReportGenerator {
+    val imageList = mapOf(
+        0 to "X-ray",
+        1 to "ECG",
+        2 to "PET",
+        3 to "MRI",
+        4 to "Alzheimer's Detection",
+        5 to "skin Dieases Analysis",
+        6 to "Retinopathy Detection"
+    )
 
-    fun generateEcgReport(context: Context, jsonResponseStr: String, userName: String): File {
+    fun generateReport(context: Context, jsonResponseStr: String, userName: String , ID :Int): File {
         try {
             // Try to parse as JSON
-            val jsonResponse = try {
-                JSONObject(jsonResponseStr)
-            } catch (e: Exception) {
-                // If parsing fails, try to clean up the string
-                val cleanedJson = cleanupJsonString(jsonResponseStr)
-                JSONObject(cleanedJson)
-            }
+            val jsonResponse = jsonResponseStr
 
             // Create PDF document
             val document = PdfDocument()
@@ -109,6 +100,12 @@ class EcgReportGenerator {
                 typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
                 textAlign = Paint.Align.CENTER
             }
+            val boldTextPaint = Paint().apply {
+                typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+                textSize = 14f
+                color = Color.BLACK
+            }
+
 
             val headerPaint = Paint().apply {
                 color = android.graphics.Color.parseColor("#2C3E50") // Dark blue for headers
@@ -128,7 +125,7 @@ class EcgReportGenerator {
             }
 
             // Add Report Title - centered
-            canvas.drawText("ECG ANALYSIS REPORT", pageWidth / 2, margin + 30f, titlePaint)
+            canvas.drawText("${imageList.get(ID)} ANALYSIS REPORT", pageWidth / 2, margin + 30f, titlePaint)
 
             // Add decorative line under title
             val linePaint = Paint().apply {
@@ -151,113 +148,84 @@ class EcgReportGenerator {
             yPosition += 40f
 
             // Add ECG Analysis Results header
-            canvas.drawText("ECG ANALYSIS RESULTS", margin + 20f, yPosition, headerPaint)
+            canvas.drawText("${imageList.get(ID)} ANALYSIS RESULTS", margin + 20f, yPosition, headerPaint)
             yPosition += 30f
 
-            // Extract prediction from the JSON
             try {
-                // Try different possible JSON structures
-                if (jsonResponse.has("prediction")) {
-                    val prediction = jsonResponse.getString("prediction")
-                    val predictionLines = breakTextIntoLines(prediction, 70) // Ensure text doesn't go off page
+                val predictionLines = breakTextIntoLines(jsonResponse, 70)
 
-                    canvas.drawText("Prediction:", margin + 20f, yPosition, subtitlePaint)
-                    yPosition += 25f
-
-                    for (line in predictionLines) {
-                        canvas.drawText(line, margin + 30f, yPosition, textPaint)
-                        yPosition += 20f
-                    }
-                }
-                // Option 2: Nested in a 'data' or 'result' object
-                else if (jsonResponse.has("data") && jsonResponse.getJSONObject("data").has("prediction")) {
-                    val prediction = jsonResponse.getJSONObject("data").getString("prediction")
-                    val predictionLines = breakTextIntoLines(prediction, 70)
-
-                    canvas.drawText("Prediction:", margin + 20f, yPosition, subtitlePaint)
-                    yPosition += 25f
-
-                    for (line in predictionLines) {
-                        canvas.drawText(line, margin + 30f, yPosition, textPaint)
-                        yPosition += 20f
-                    }
-                }
-                // Option 3: If there are multiple fields
-                else {
-                    // Iterate through all keys and print them
-                    val keys = jsonResponse.keys()
-                    while (keys.hasNext()) {
-                        val key = keys.next()
-                        val value = jsonResponse.get(key).toString()
-
-                        // Draw the key as a subtitle
-                        canvas.drawText("$key:", margin + 20f, yPosition, subtitlePaint)
-                        yPosition += 25f
-
-                        // Break the value into multiple lines
-                        val valueLines = breakTextIntoLines(value, 70)
-                        for (line in valueLines) {
-                            canvas.drawText(line, margin + 30f, yPosition, textPaint)
-                            yPosition += 20f
-
-                            // Check if we're reaching the bottom of the page
-                            if (yPosition > pageHeight - margin - 100f) {
-                                // Finish current page and start a new one
-                                document.finishPage(page)
-
-                                // Create new page
-                                val newPageInfo = PdfDocument.PageInfo.Builder(595, 842, document.pages.size + 1).create()
-                                val newPage = document.startPage(newPageInfo)
-                                val newCanvas = newPage.canvas
-
-                                // Fill background with light blue color for the new page
-                                newCanvas.drawRect(0f, 0f, pageWidth, pageHeight, backgroundPaint)
-
-                                // Draw border for the new page
-                                newCanvas.drawRect(margin, margin, pageWidth - margin, pageHeight - margin, borderPaint)
-
-                                // Reset y position for new page
-                                yPosition = margin + 40f
-
-                                // Update canvas reference
-                                canvas = newCanvas
-                                page = newPage
-                            }
-                        }
-
-                        yPosition += 10f // Add space between different key-value pairs
-                    }
-                }
-            } catch (e: Exception) {
-                // If JSON parsing fails, just display the raw response
-                canvas.drawText("Raw Analysis Result:", margin + 20f, yPosition, subtitlePaint)
+                canvas.drawText("Prediction:", margin + 20f, yPosition, subtitlePaint)
                 yPosition += 25f
 
-                // Break the raw response into multiple lines to fit in the PDF
-                val rawLines = breakTextIntoLines(jsonResponseStr, 70)
-                for (line in rawLines) {
-                    canvas.drawText(line, margin + 30f, yPosition, textPaint)
+                for (line in predictionLines) {
+                    val segments = line.split("**")
+                    var xPos = margin + 30f
+
+                    for ((index, segment) in segments.withIndex()) {
+                        val paintToUse = if (index % 2 == 1) boldTextPaint else textPaint
+
+                        canvas.drawText(segment, xPos, yPosition, paintToUse)
+                        xPos += paintToUse.measureText(segment)
+                    }
+
                     yPosition += 20f
 
-                    // Check if we need a new page
+                    // Optional: Start a new line if the line seems like a new topic
+                    if (line.trim().startsWith("**")) {
+                        yPosition += 10f
+                    }
+
+                    // Handle page overflow
                     if (yPosition > pageHeight - margin - 100f) {
                         document.finishPage(page)
                         val newPageInfo = PdfDocument.PageInfo.Builder(595, 842, document.pages.size + 1).create()
-                        val newPage = document.startPage(newPageInfo)
-                        val newCanvas = newPage.canvas
+                        page = document.startPage(newPageInfo)
+                        canvas = page.canvas
 
-                        // Fill background with light blue color for the new page
-                        newCanvas.drawRect(0f, 0f, pageWidth, pageHeight, backgroundPaint)
-
-                        // Draw border for the new page
-                        newCanvas.drawRect(margin, margin, pageWidth - margin, pageHeight - margin, borderPaint)
+                        canvas.drawRect(0f, 0f, pageWidth, pageHeight, backgroundPaint)
+                        canvas.drawRect(margin, margin, pageWidth - margin, pageHeight - margin, borderPaint)
 
                         yPosition = margin + 40f
-                        canvas = newCanvas
-                        page = newPage
+                    }
+                }
+            } catch (e: Exception) {
+                // If JSON parsing fails, display raw response
+                canvas.drawText("Raw Analysis Result:", margin + 20f, yPosition, subtitlePaint)
+                yPosition += 25f
+
+                val rawLines = breakTextIntoLines(jsonResponseStr, 70)
+
+                for (line in rawLines) {
+                    val segments = line.split("**")
+                    var xPos = margin + 30f
+
+                    for ((index, segment) in segments.withIndex()) {
+                        val paintToUse = if (index % 2 == 1) boldTextPaint else textPaint
+
+                        canvas.drawText(segment, xPos, yPosition, paintToUse)
+                        xPos += paintToUse.measureText(segment)
+                    }
+
+                    yPosition += 20f
+
+                    if (line.trim().startsWith("**")) {
+                        yPosition += 10f
+                    }
+
+                    if (yPosition > pageHeight - margin - 100f) {
+                        document.finishPage(page)
+                        val newPageInfo = PdfDocument.PageInfo.Builder(595, 842, document.pages.size + 1).create()
+                        page = document.startPage(newPageInfo)
+                        canvas = page.canvas
+
+                        canvas.drawRect(0f, 0f, pageWidth, pageHeight, backgroundPaint)
+                        canvas.drawRect(margin, margin, pageWidth - margin, pageHeight - margin, borderPaint)
+
+                        yPosition = margin + 40f
                     }
                 }
             }
+
 
             // Check if we have space for disclaimer
             if (yPosition > pageHeight - margin - 70f) {
@@ -302,7 +270,7 @@ class EcgReportGenerator {
             document.finishPage(page)
 
             // Create output file
-            val outputFile = File(context.filesDir, "ECG_Report_${System.currentTimeMillis()}.pdf")
+            val outputFile = File(context.filesDir, "${imageList.get(ID)}_Report_${System.currentTimeMillis()}.pdf")
             val outputStream = FileOutputStream(outputFile)
             document.writeTo(outputStream)
             document.close()
@@ -315,30 +283,6 @@ class EcgReportGenerator {
         }
     }
 
-    private fun cleanupJsonString(input: String): String {
-        // Same as your existing method
-        return if (input.startsWith("jsonModel(") && input.endsWith(")")) {
-            val content = input.substring(input.indexOf('(') + 1, input.lastIndexOf(')'))
-            if (content.contains("=")) {
-                val parts = content.split("=")
-                if (parts.size >= 2) {
-                    val key = parts[0].trim()
-                    val value = parts[1].trim()
-                    """{"$key":"$value"}"""
-                } else {
-                    """{"data":"$content"}"""
-                }
-            } else {
-                """{"data":"$content"}"""
-            }
-        } else {
-            if (!input.trim().startsWith("{")) {
-                """{"data":"$input"}"""
-            } else {
-                input
-            }
-        }
-    }
 
     private fun breakTextIntoLines(text: String, maxCharsPerLine: Int): List<String> {
         val lines = mutableListOf<String>()

@@ -71,9 +71,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import com.project.cureconnect.R
-import com.project.cureconnect.login.UserModel
+import com.project.cureconnect.login.AuthViewModel
+
 import com.project.cureconnect.pateints.mainScreens.BannerScreen
 import com.project.cureconnect.pateints.mainScreens.HealthNewsSection
 import com.project.cureconnect.pateints.mainScreens.HealthStatsSection
@@ -87,8 +86,7 @@ import com.project.cureconnect.pateints.startpages.SplashScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import login.AuthViewModel
+
 
 
 val primaryBlue = Color(0xFF4285F4)
@@ -97,7 +95,7 @@ val darkBlue = Color(0xFF3367D6)
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
-fun MainDashBoard(navController: NavController , viewModel: AuthViewModel= viewModel()) {
+fun MainDashBoard(navController: NavController ) {
 
 
     lateinit var speechHelper: SpeechRecognitionHelper
@@ -139,15 +137,7 @@ fun MainDashBoard(navController: NavController , viewModel: AuthViewModel= viewM
                 .fillMaxSize()
                 .background(Color.White)
         ) {
-            viewModel.getUserData { user ->
-                if (user != null) {
-                    // Handle the user data
-                    Log.d("UserData", "User Name: ${user.name}, Email: ${user.email}")
-                } else {
-                    // Handle the case when the user data is null
-                    Log.d("UserData", "User not found or an error occurred")
-                }
-            }
+
             MainTopBar(navController ,speechHelper)
 
             // Wrap content in scrollable container
@@ -342,9 +332,3 @@ data class BottomNavItem(
     val label: String
 )
 
-@Preview(showBackground = true)
-@Composable
-fun DashboardPreview() {
-    val navController = rememberNavController()
-    MainDashBoard(navController)
-}

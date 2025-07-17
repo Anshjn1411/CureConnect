@@ -1,4 +1,4 @@
-package login
+package com.project.cureconnect.login
 
 import android.app.Activity
 import android.util.Log
@@ -23,11 +23,25 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -40,17 +54,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -59,198 +78,212 @@ import androidx.navigation.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.project.cureconnect.R
 import com.project.cureconnect.login.LoginUiState
-import com.project.cureconnect.login.UserModel
+
+import com.project.cureconnect.data.datastore.UserSessionLayer.UserSessionManager
 import com.project.cureconnect.pateints.navigationRoutes.Screen
+import com.project.cureconnect.ui.theme.CustomShapes
 import com.project.ecommerceLocal.utils.Apputils
 
 
 @Composable
-fun SignIn(navController: NavController, authViewModel: AuthViewModel = viewModel(),
-           onLoginSuccess: () -> Unit) {
-    var isLoading by remember { mutableStateOf(false) }
+fun LoginScreen(navController: NavController) {
     val context = LocalContext.current
-    var userInput by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var userData by remember { mutableStateOf<UserModel?>(null) }
+    val sessionManager = remember { UserSessionManager(context) }
 
-
-
-
-
-
-    // Initialize Google Sign-In
-    authViewModel.initGoogleSignIn(context)
-
-    // Create a launcher for Google Sign-In
-    val googleSignInLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult(),
-        onResult = { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                isLoading = true
-                authViewModel.handleGoogleSignInResult(result) { success, errorMessage ->
-                    isLoading = false
-                    if (success) {
-                        onLoginSuccess()
-                        // Navigate directly to MainDashboard on successful Google sign-in
-                        navController.navigate(Screen.MainDashBoard.routes) {
-                            popUpTo("auth") { inclusive = true }
-                        }
-                    } else {
-                        Apputils.showToast(context, errorMessage ?: "Google Sign-In Failed")
-                    }
-                }
+    val authViewModel: AuthViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return AuthViewModel(sessionManager) as T
             }
         }
     )
 
-    Column(
-        modifier = Modifier.fillMaxSize().padding(top=80.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+
+    val loading by authViewModel.loading
+    val loginSuccess by authViewModel.successLogin
+    val loginMessage by authViewModel.loginMessage
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    LaunchedEffect(loginSuccess) {
+        if (loginSuccess) {
+            navController.navigate(Screen.MainDashBoard.routes) {
+                popUpTo(Screen.Login.routes) { inclusive = true }
+            }
+        }
+    }
+
+    loginMessage?.let {
+        ShowToast(message = it)
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(48.dp))
 
-        Image(painter = painterResource(R.drawable.cureconnect_logo), contentDescription = null)
-        Spacer(Modifier.height(10.dp))
-        Text(text = "Please Sign in to continue",
-            fontWeight = Bold,
-            color = colorResource(R.color.primary_blue_light)
-        )
-        Spacer(Modifier.height(40.dp))
-        OutlinedTextField(value = userInput, onValueChange = {
-            userInput = it
-        },
-            modifier = Modifier.fillMaxWidth(0.9f).height(50.dp),
-            placeholder = { Row {
-                Image(painter = painterResource(R.drawable.user_logo), contentDescription = null)
-                Spacer(Modifier.width(10.dp))
-
-                Text("Email, Username, or Phone", color = colorResource(R.color.black), fontStyle = FontStyle.Italic)
-            }
-            }
-        )
-        Spacer(Modifier.height(20.dp))
-        OutlinedTextField(value = password, onValueChange = {
-            password = it
-        },
-            modifier = Modifier.fillMaxWidth(0.9f).height(50.dp),
-            placeholder = { Row {
-                Image(painter = painterResource(R.drawable.pass_logo), contentDescription = null)
-                Spacer(Modifier.width(10.dp))
-
-                Text("Your Password", color = Color.Black, fontStyle = FontStyle.Italic)
-            }
-            },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            visualTransformation = PasswordVisualTransformation()
-        )
-        Button(onClick = {
-            isLoading = true
-            authViewModel.login(userInput, password) { success, errormessage ->
-                if (success) {
-                    onLoginSuccess()
-                    isLoading = false
-
-
-
-                } else {
-                    isLoading = false
-                    Apputils.showToast(context, errormessage ?: "Error in login")
+            // CureConnect Branding Header
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0xFFE3F2FD)
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Welcome to CureConnect 👩‍⚕️",
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1976D2)
+                        ),
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Your health companion. Sign in to consult with top doctors.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color(0xFF424242),
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
-        },
-            modifier = Modifier.padding(top=30.dp).size(350.dp, 65.dp),
-            colors = ButtonDefaults.buttonColors(colorResource(R.color.primary_blue_light)),
-            shape = RoundedCornerShape(10.dp)) {
-            if(isLoading){
-                CircularProgressIndicator()
-            } else {
-                Text(text = "Sign In",
-                    fontSize = 30.sp,
-                    fontWeight = Bold,
-                    color = Color.White,
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Login Form
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(modifier = Modifier.padding(24.dp)) {
+                    Text(
+                        text = "Login to CureConnect",
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
+                        color = Color(0xFF0D47A1),
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = email,
+                        onValueChange = { email = it },
+                        label = { Text("Email") },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Email,
+                                contentDescription = null,
+                                tint = Color(0xFF1976D2)
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedTextField(
+                        value = password,
+                        onValueChange = { password = it },
+                        label = { Text("Password") },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = null,
+                                tint = Color(0xFF1976D2)
+                            )
+                        },
+                        trailingIcon = {
+                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                Icon(
+                                    imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                    contentDescription = null
+                                )
+                            }
+                        },
+                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Button(
+                        onClick = {
+                            keyboardController?.hide()
+                            authViewModel.login(email, password)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF1976D2),
+                            contentColor = Color.White
+                        ),
+                        enabled = !loading && email.isNotBlank() && password.isNotBlank()
+                    ) {
+                        if (loading) {
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                strokeWidth = 2.dp,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                        }
+                        Text(text = if (loading) "Signing in..." else "Sign In")
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text("Don’t have an account? ")
+                Text(
+                    text = "Sign Up",
+                    color = Color(0xFF1976D2),
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clickable {
+                        navController.navigate(Screen.SignUp.routes)
+                    }
                 )
             }
-        }
-        Spacer(Modifier.height(10.dp))
-        Text(text = "---Or Sign in with social account---",
-            fontSize = 20.sp,
-            color = Color.Black
-        )
-        Spacer(Modifier.height(20.dp))
-        Row(
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(60.dp)
-                    .background(color = Color.Transparent, shape = RoundedCornerShape(12.dp))
-                    .clickable { /* Apple login implementation */ }
-                    .border(2.dp, colorResource(R.color.primary_blue_light), shape = RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(painter = painterResource(R.drawable.apple_logo), contentDescription = null,
-                    modifier = Modifier.size(250.dp))
-            }
-            Spacer(Modifier.width(20.dp))
-            Box(
-                modifier = Modifier
-                    .size(60.dp)
-                    .background(color = Color.Transparent, shape = RoundedCornerShape(12.dp))
-                    .clickable {
-                        // Launch Google Sign-In
-                        googleSignInLauncher.launch(authViewModel.getGoogleSignInIntent())
-                    }
-                    .border(2.dp, colorResource(R.color.primary_blue_light), shape = RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(painter = painterResource(R.drawable.google_logo), contentDescription = null,
-                    modifier = Modifier.size(250.dp))
-            }
-            Spacer(Modifier.width(20.dp))
-            Box(
-                modifier = Modifier
-                    .size(60.dp)
-                    .background(color = Color.Transparent, shape = RoundedCornerShape(12.dp))
-                    .clickable { /* Facebook login implementation */ }
-                    .border(2.dp, colorResource(R.color.primary_blue), shape = RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(painter = painterResource(R.drawable.facebook_logo), contentDescription = null,
-                    modifier = Modifier.size(250.dp))
-            }
-        }
-        Spacer(Modifier.height(30.dp))
-        Text(
-            text = "Forgot your password?",
-            color = colorResource(R.color.primary_blue),
-            fontSize = 16.sp,
-            fontWeight = Bold,
-            modifier = Modifier.clickable {
-                navController.navigate(Screen.ForgotPassword.routes)
-            }
-        )
-        Spacer(Modifier.height(15.dp))
-        Row {
-            Text(
-                text = "Didn't have an account?",
-                color = colorResource(R.color.primary_blue_light),
-                fontSize = 16.sp,
-            )
-            Text(
-                text = "Sign Up Here",
-                color = colorResource(R.color.primary_blue_light),
-                fontSize = 16.sp,
-                fontWeight = Bold,
-                style = TextStyle(textDecoration = TextDecoration.Underline),
-                modifier = Modifier.clickable {
-                    navController.navigate(Screen.SignUp.routes)
-                }
-            )
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun tingPreview() {
-    SignIn(rememberNavController(), onLoginSuccess = {})
+fun ShowToast(message: String) {
+    val context = LocalContext.current
+
+    LaunchedEffect(message) {
+        if (message.isNotBlank()) {
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        }
+    }
 }
+
+

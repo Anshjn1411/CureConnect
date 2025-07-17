@@ -1,6 +1,5 @@
-package login
+package com.project.cureconnect.login
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,234 +12,304 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight.Companion.Bold
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 
-import com.project.cureconnect.R
+import com.project.cureconnect.data.datastore.UserSessionLayer.UserSessionManager
 import com.project.cureconnect.pateints.navigationRoutes.Screen
 import com.project.ecommerceLocal.utils.Apputils
 
+@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
-fun SignUp(navController: NavController, authViewModel: AuthViewModel = viewModel()){
-    var isValid by remember { mutableStateOf(true) }
-    val passwordRegex = Regex("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,}$")
-    var name by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var phone by remember { mutableStateOf("") }
-    var confirmpass by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
-    var selectedRole by remember { mutableStateOf("Patient") }
-
+fun SignUpScreen(navController: NavController) {
     val context = LocalContext.current
-    Column(
-        modifier = Modifier.fillMaxSize().padding(top=80.dp).verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
+    val sessionManager = remember { UserSessionManager(context) }
 
-    ) {
-
-        Image(painter = painterResource(R.drawable.cureconnect_logo), contentDescription = null)
-        Spacer(Modifier.height(10.dp))
-        Text(text = "Please Sign up to get new account",
-            fontWeight = Bold,
-            color = colorResource(R.color.primary_blue_light)
-        )
-        Spacer(Modifier.height(40.dp))
-        OutlinedTextField(value = name , onValueChange = {name=it},
-            modifier = Modifier.fillMaxWidth(0.9f).height(50.dp),
-            placeholder = { Row {
-                Image(painter = painterResource(R.drawable.user_logo), contentDescription = null)
-                Spacer(Modifier.width(10.dp))
-
-                Text("Your Name" , color = Color.Black , fontStyle = FontStyle.Italic)
-
+    val authViewModel: AuthViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return AuthViewModel(sessionManager) as T
             }
-            }
-
-        )
-        Spacer(Modifier.height(15.dp))
-        // Role selection (Doctor/Patient)
-
-        OutlinedTextField(value = email , onValueChange = {email=it},
-            modifier = Modifier.fillMaxWidth(0.9f).height(50.dp),
-            placeholder = { Row {
-                Image(painter = painterResource(R.drawable.mail_logo), contentDescription = null)
-                Spacer(Modifier.width(10.dp))
-
-                Text("Your E-mail" , color = Color.Black , fontStyle = FontStyle.Italic)
-
-            }
-            }
-        )
-        Spacer(Modifier.height(10.dp))
-        OutlinedTextField(value = phone , onValueChange = {phonenumber->
-            if(phonenumber.all { it.isDigit() }){
-                phone=phonenumber
-            }
-
-        },
-            modifier = Modifier.fillMaxWidth(0.9f).height(50.dp),
-            placeholder = { Row {
-                Image(painter = painterResource(R.drawable.phone_logo), contentDescription = null)
-                Spacer(Modifier.width(10.dp))
-
-                Text("Your Phone Number" , color = Color.Black , fontStyle = FontStyle.Italic)
-
-            }
-            },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-        )
-        Spacer(Modifier.height(10.dp))
-        OutlinedTextField(value = password ,  onValueChange = { newText ->
-            password = newText
-            isValid = passwordRegex.matches(newText)
-        },
-            modifier = Modifier.fillMaxWidth(0.9f).height(50.dp),
-            placeholder = { Row {
-                Image(painter = painterResource(R.drawable.pass_logo), contentDescription = null)
-                Spacer(Modifier.width(10.dp))
-
-                Text("Your Password" , color = Color.Black , fontStyle = FontStyle.Italic)
-
-            }
-            },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-
-            visualTransformation = PasswordVisualTransformation()
-        )
-        Spacer(Modifier.height(10.dp))
-        OutlinedTextField(value = confirmpass ,onValueChange = { newText ->
-            confirmpass = newText
-            isValid = passwordRegex.matches(newText)
-        },
-            modifier = Modifier.fillMaxWidth(0.9f).height(50.dp),
-            placeholder = { Row {
-                Image(painter = painterResource(R.drawable.pass_logo), contentDescription = null)
-                Spacer(Modifier.width(10.dp))
-
-                Text("Confirm Your Password" , color = Color.Black , fontStyle = FontStyle.Italic)
-
-            }
-            }
-        )
-        Spacer(Modifier.height(15.dp))
-        Text("Select your role:", fontWeight = Bold, fontSize = 18.sp, color = Color.Black)
-        Row(modifier = Modifier.fillMaxWidth().padding(10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly) {
-            RadioButton(selected = selectedRole == "Doctor", onClick = { selectedRole = "Doctor" })
-            Text("Doctor", modifier = Modifier.clickable { selectedRole = "Doctor" })
-            Spacer(Modifier.width(20.dp))
-            RadioButton(selected = selectedRole == "Patient", onClick = { selectedRole = "Patient" })
-            Text("Patient", modifier = Modifier.clickable { selectedRole = "Patient" })
         }
-        Spacer(Modifier.height(10.dp))
+    )
 
+    var name by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
 
-        Text("By clicking the Sign Up Button , you agree with the public offer.",
-            modifier = Modifier.padding(start = 20.dp, end = 20.dp),
-            fontSize = 15.sp,
+    val loading by authViewModel.loading
+    val signupSuccess by authViewModel.successSignup
+    val signupMessage by authViewModel.signUpMessage
 
-            )
-        Button(onClick = {
-            if(confirmpass==password){
-                isLoading=true
-                authViewModel.signup(email,password, name , phone , selectedRole ){success , errormessage ->
-                    if(success){
-                        isLoading=false
-                        navController.navigate(Screen.SignIn.routes){
-                            popUpTo("auth"){inclusive= true}
-                        }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
-                    }else{
-                        isLoading=false
-                        Apputils.showToast(context,errormessage?:"Error in signup")
+    // Success Navigation & Toast
+    LaunchedEffect(signupSuccess, signupMessage) {
+        signupMessage?.let { Apputils.showToast(context , it) }
 
-                    }
-                }
-            }else{
-                Apputils.showToast(context,"Password must be same")
+        if (signupSuccess) {
+            navController.navigate(Screen.Login.routes) {
+                popUpTo(Screen.SignUp.routes) { inclusive = true }
             }
-        } ,
-            enabled = !isLoading,
-
-            modifier = Modifier.padding(top =30.dp).size(350.dp,65.dp),
-            colors = ButtonDefaults.buttonColors(colorResource(R.color.primary_blue_light)),
-            shape = RoundedCornerShape(10.dp) ){
-            if(isLoading){
-                CircularProgressIndicator()
-            }else{
-                Text(text = "Sign Up",
-                    fontSize = 30.sp,
-                    fontWeight = Bold,
-                    color = Color.White,
-
-                    )
-            }
-
         }
-
-        Spacer(Modifier.height(30.dp))
-
-
-        Row {
-            Text(
-                text = "Already have an account?",
-                color = colorResource(R.color.primary_blue),
-                fontSize = 16.sp,
-
-                )
-            Text(
-                text = "Sign In Here",
-                color = colorResource(R.color.primary_blue_light),
-                fontSize = 16.sp,
-                fontWeight = Bold,
-                style = TextStyle(textDecoration = TextDecoration.Underline),
-                modifier = Modifier.clickable { navController.navigate(Screen.SignIn.routes) }
-            )
-
-        }
-
-
-
-
-
     }
 
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Header Section
+        SignUpHeader()
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Input Fields
+        PersonalInfoSection(
+            name = name,
+            onNameChange = { name = it },
+            email = email,
+            onEmailChange = { email = it },
+            password = password,
+            onPasswordChange = { password = it },
+            passwordVisible = passwordVisible,
+            onPasswordVisibilityChange = { passwordVisible = !passwordVisible },
+            phone = phone,
+            onPhoneChange = { phone = it }
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Sign-Up & Login Navigation
+        ActionButtonsSection(
+            loading = loading,
+            onSignUp = {
+                keyboardController?.hide()
+                authViewModel.signup(name, email, password, phone)
+            },
+            onNavigateToLogin = {
+                navController.navigate(Screen.Login.routes)
+            }
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+    }
 }
-//
-//@Preview(showBackground = true)
-//@Composable
-//fun SignUpPreview() {
-//    SignUp()
-//}
+
+@Composable
+private fun SignUpHeader() {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = "Create Account",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Join our skill swap community",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun PersonalInfoSection(
+    name: String,
+    onNameChange: (String) -> Unit,
+    email: String,
+    onEmailChange: (String) -> Unit,
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    passwordVisible: Boolean,
+    onPasswordVisibilityChange: () -> Unit,
+    phone: String,
+    onPhoneChange:(String) ->Unit
+
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = "Personal Information",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = name,
+                onValueChange = onNameChange,
+                label = { Text("Full Name") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    focusedLabelColor = MaterialTheme.colorScheme.primary
+                )
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = email,
+                onValueChange = onEmailChange,
+                label = { Text("Email") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    focusedLabelColor = MaterialTheme.colorScheme.primary
+                )
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = password,
+                onValueChange = onPasswordChange,
+                label = { Text("Password") },
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                modifier = Modifier.fillMaxWidth(),
+                trailingIcon = {
+                    IconButton(onClick = onPasswordVisibilityChange) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Default.Check else Icons.Default.Check,
+                            contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                        )
+                    }
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    focusedLabelColor = MaterialTheme.colorScheme.primary
+                )
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = phone,
+                onValueChange = onPhoneChange,
+                label = { Text("phone number (optional)") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    focusedLabelColor = MaterialTheme.colorScheme.primary
+                )
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+        }
+    }
+}
+
+
+@Composable
+private fun ActionButtonsSection(
+    loading: Boolean,
+    onSignUp: () -> Unit,
+    onNavigateToLogin: () -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Button(
+            onClick = onSignUp,
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !loading,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary
+            ),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
+        ) {
+            if (loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(
+                    text = "Create Account",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Already have an account?",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = "Sign In",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.clickable { onNavigateToLogin() }
+            )
+        }
+    }
+}

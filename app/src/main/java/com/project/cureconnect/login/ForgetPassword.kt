@@ -1,4 +1,4 @@
-package login
+package com.project.cureconnect.login
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column

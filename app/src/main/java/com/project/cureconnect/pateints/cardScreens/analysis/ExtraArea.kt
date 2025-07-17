@@ -73,7 +73,18 @@ fun ExtraArea(navController: NavController) {
     }
 
     Spacer(modifier = Modifier.height(24.dp))
+}
 
+
+@Composable
+fun ExtraArea2(navController: NavController) {
+    var isDarkMode by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+
+    val backgroundColor = if (isDarkMode) Color(0xFF121212) else Color(0xFFF5F5F5)
+    val textColor = if (isDarkMode) Color.White else Color.Black
+    val cardColor = if (isDarkMode) Color(0xFF1E1E1E) else Color.White
     // Accuracy KPI Card
     Card(
         modifier = Modifier
@@ -125,63 +136,64 @@ fun ExtraArea(navController: NavController) {
 
     Spacer(modifier = Modifier.height(24.dp))
 
-//    // Accuracy Graph Card
-//    Card(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .height(220.dp),
-//        colors = CardDefaults.cardColors(containerColor = cardColor),
-//        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-//        shape = RoundedCornerShape(16.dp)
-//    ) {
-//        Column(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(16.dp)
-//        ) {
-//            Row(
-//                modifier = Modifier.fillMaxWidth(),
-//                horizontalArrangement = Arrangement.SpaceBetween,
-//                verticalAlignment = Alignment.CenterVertically
-//            ) {
-//                Text(
-//                    text = "Accuracy Trends",
-//                    style = MaterialTheme.typography.titleMedium,
-//                    color = textColor,
-//                    fontWeight = FontWeight.Bold
-//                )
-//
-//                Row(verticalAlignment = Alignment.CenterVertically) {
-//                    Box(
-//                        modifier = Modifier
-//                            .size(10.dp)
-//                            .background(Color.Blue, shape = RoundedCornerShape(2.dp))
-//                    )
-//                    Spacer(modifier = Modifier.width(4.dp))
-//                    Text(
-//                        text = "Accuracy",
-//                        style = MaterialTheme.typography.bodySmall,
-//                        color = textColor.copy(alpha = 0.7f)
-//                    )
-//                }
-//            }
-//
-//            Spacer(modifier = Modifier.height(16.dp))
-//
-//            // Simplified accuracy chart
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxSize()
-//                    .clip(RoundedCornerShape(8.dp))
-//                    .background(if (isDarkMode) Color(0xFF2A2A2A) else Color(0xFFF0F0F0)),
-//                contentAlignment = Alignment.Center
-//            ) {
-//                AccuracyChart(isDarkMode = isDarkMode)
-//            }
-//        }
- //   }
+    // Accuracy Graph Card
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(220.dp),
+        colors = CardDefaults.cardColors(containerColor = cardColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Accuracy Trends",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = textColor,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .background(Color.Blue, shape = RoundedCornerShape(2.dp))
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "Accuracy",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = textColor.copy(alpha = 0.7f)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Simplified accuracy chart
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(if (isDarkMode) Color(0xFF2A2A2A) else Color(0xFFF0F0F0)),
+                contentAlignment = Alignment.Center
+            ) {
+                AccuracyChart(isDarkMode = isDarkMode)
+            }
+        }
+    }
 
 }
+
 
 
 @Composable

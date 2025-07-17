@@ -31,6 +31,7 @@ import androidx.navigation.NavController
 import com.project.cureconnect.pateints.cardScreens.appoinmenet.Doctor
 import com.project.cureconnect.pateints.cardScreens.appoinmenet.DoctorCard
 import com.project.cureconnect.pateints.cardScreens.appoinmenet.fetchDoctorsFromFirestore
+import com.project.cureconnect.pateints.cardScreens.appoinmenet.sampleDoctors
 
 import com.project.cureconnect.pateints.navigationRoutes.Screen
 
@@ -41,9 +42,7 @@ fun DoctorList(navController: NavController) {
     var doctors by remember { mutableStateOf<List<Doctor>>(emptyList()) }
 
     LaunchedEffect(Unit) {
-        fetchDoctorsFromFirestore { fetchedDoctors ->
-            doctors = fetchedDoctors
-        }
+        doctors = sampleDoctors.sampleDoctors
     }
     Scaffold(
         topBar = {
@@ -53,7 +52,7 @@ fun DoctorList(navController: NavController) {
                     fontWeight = FontWeight.Bold , color = Color.Black
                     , modifier = Modifier.padding(start = 80.dp)) },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigate("main") }) {
+                    IconButton(onClick = { navController.navigateUp()}) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back"
@@ -79,7 +78,7 @@ fun DoctorList(navController: NavController) {
             items(doctors) { doctor ->
                 DoctorCard(
                     doctor = doctor,
-                    onDoctorClick = { navController.navigate(Screen.chatScreen.routes) }
+                    onDoctorClick = { navController.navigate("chat_screen/${doctor.id}") }
                 )
                 Spacer(Modifier.height(15.dp))
             }

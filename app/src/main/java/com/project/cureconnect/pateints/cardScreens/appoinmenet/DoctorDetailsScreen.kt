@@ -66,28 +66,32 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.project.cureconnect.R
+import com.project.cureconnect.data.datastore.UserSessionLayer.CachedUser
+import com.project.cureconnect.data.datastore.UserSessionLayer.UserSessionManager
 
-import kotlinx.coroutines.launch
-import login.AuthViewModel
 
 import java.util.UUID
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DoctorDetailsScreen(doctor: Doctor, navController: NavController, viewModelLogin: AuthViewModel = viewModel(), viewModel: AppoinmenetViewModel = viewModel()) {
+fun DoctorDetailsScreen(doctor: Doctor, navController: NavController, viewModel: AppoinmenetViewModel = viewModel()) {
     val scrollState = rememberScrollState()
     var selectedDate by remember { mutableStateOf("23") }
     var selectedDay by remember { mutableStateOf("Wed") }
     var selectedTime by remember { mutableStateOf("02:00 PM") }
-    val email: String = viewModelLogin.getCurrentUserEmail().toString()
     var name by remember { mutableStateOf("") }
     val context = LocalContext.current
     val activity = context as ComponentActivity
     var appointments by remember { mutableStateOf<Appointment?>(null) }
-    viewModelLogin.getUserData { user ->
-        name = user?.name.toString()
+    val sessionManager = remember { UserSessionManager(context) }
+    var cachedUser by remember { mutableStateOf<CachedUser?>(null) }
+
+    // Observe cached user from DataStore
+    LaunchedEffect(Unit) {
+        sessionManager.userData.collect { user ->
+            cachedUser = user
+        }
     }
     Log.d("checker ", "checking")
 
@@ -102,9 +106,10 @@ fun DoctorDetailsScreen(doctor: Doctor, navController: NavController, viewModelL
                 Toast.makeText(context, "Payment Successful!", Toast.LENGTH_SHORT).show()
 
                 // Navigate to confirmation screen
-                navController.navigate("appointment_confirmation") {
+                navController.navigate("appointment_confirmation/${doctor.id}") {
                     popUpTo("book_appointment") { inclusive = true }
                 }
+
             }
             is PaymentStatus.Failed -> {
                 // Show error toast or dialog
@@ -342,7 +347,7 @@ fun DoctorDetailsScreen(doctor: Doctor, navController: NavController, viewModelL
                 onClick = {
                     val appointment = Appointment(
                         id = UUID.randomUUID().toString(),
-                        patientId = name,
+                        patientId = cachedUser?.uid.toString(),
                         doctorId = doctor.id,
                         doctorname = doctor.name,
                         date = "$selectedDay $selectedDate",
@@ -356,7 +361,7 @@ fun DoctorDetailsScreen(doctor: Doctor, navController: NavController, viewModelL
                         doctor,
                     )
 
-                    viewModel.successfullBooking(email, appointment, doctor,name)
+                    viewModel.successfullBooking(cachedUser?.email, appointment, doctor,name)
                     bookAppointment(appointment)
                 },
                 modifier = Modifier

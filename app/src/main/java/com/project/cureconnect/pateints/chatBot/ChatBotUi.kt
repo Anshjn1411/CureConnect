@@ -62,14 +62,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.project.cureconnect.R
-import com.project.cureconnect.login.UserModel
+import com.project.cureconnect.login.User
+
+import com.project.cureconnect.data.datastore.UserSessionLayer.UserSessionManager
 import com.project.cureconnect.pateints.mainScreens.MainBottomBar
 import com.project.cureconnect.pateints.navigationRoutes.Screen
 import com.project.cureconnect.ui.theme.comic
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import login.AuthViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -77,24 +75,34 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HealthChatBotScreen(navController: NavController, viewModel: HealthChatBotViewModel = viewModel() , authViewModel: AuthViewModel= viewModel()) {
+fun HealthChatBotScreen(navController: NavController, viewModel: HealthChatBotViewModel = viewModel() ) {
     val messages by viewModel.messages.collectAsState()
     var messageInput by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
-    val name = remember { mutableStateOf("") }
+    val sessionManager = remember { UserSessionManager(context) }
+
+    var name by remember { mutableStateOf("User") }
     var selectedItem by remember { mutableStateOf(1) }
 
-    val userModel : UserModel = UserModel(name.value)
+    // ✅ Observe user session data
+    val userData by sessionManager.userData.collectAsState(initial = null)
+
+    // Update name from session
+    LaunchedEffect(userData) {
+        userData?.let {
+            name = it.name ?: "User"
+        }
+    }
+
+    val userModel = User(name)
+
     // Scroll to bottom when new messages arrive
     LaunchedEffect(messages.size) {
         if (messages.isNotEmpty()) {
             listState.animateScrollToItem(messages.size - 1)
         }
-        authViewModel.getUserData(onResult = { userModel ->
-            name.value = userModel?.name ?: "User"
-        })
     }
 
     Scaffold(

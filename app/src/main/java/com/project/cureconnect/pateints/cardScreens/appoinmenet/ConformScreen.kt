@@ -59,10 +59,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.project.cureconnect.pateints.navigationRoutes.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppointmentConfirmationScreen(navController: NavController) {
+fun AppointmentConfirmationScreen(navController: NavController , doctor: Doctor) {
     val scrollState = rememberScrollState()
 
 
@@ -123,8 +124,8 @@ fun AppointmentConfirmationScreen(navController: NavController) {
 
                         Spacer(modifier = Modifier.width(16.dp))
                         Column {
-                            Text("Dr. Smith", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
-                            Text("Cardiologist", fontSize = 14.sp, color = Color.Gray)
+                            Text(doctor.name, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                            Text(doctor.specialty, fontSize = 14.sp, color = Color.Gray)
                         }
                     }
                     Spacer(modifier = Modifier.height(24.dp))
@@ -142,7 +143,7 @@ fun AppointmentConfirmationScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = { navController.navigate("my_appointments") },
+                onClick = { navController.navigate(Screen.MyAppointment.routes) },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 shape = RoundedCornerShape(28.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4285F4))
@@ -153,7 +154,7 @@ fun AppointmentConfirmationScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { navController.navigate("main") },
+                onClick = { navController.navigate(Screen.MainDashBoard.routes) },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 shape = RoundedCornerShape(28.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White),

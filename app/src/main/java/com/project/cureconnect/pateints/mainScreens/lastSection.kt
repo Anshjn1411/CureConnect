@@ -68,16 +68,79 @@ import androidx.navigation.compose.rememberNavController
 import com.project.cureconnect.R
 import com.project.cureconnect.darkBlue
 import com.project.cureconnect.lightGrey
+import com.project.cureconnect.pateints.cardScreens.appoinmenet.Doctor
 import com.project.cureconnect.pateints.navigationRoutes.Screen
 import com.project.cureconnect.primaryBlue
 
 @Composable
 fun SpecialistDoctorsSection(visible: Boolean, navController: NavController) {
     val doctors = listOf(
-        DoctorInfo(stringResource(R.string.Dr_Sarah_Wilson), stringResource(R.string.Cardiologist), 4.9f, R.drawable.banner_telemedicine),
-        DoctorInfo(stringResource(R.string.Dr_James_Chen), stringResource(R.string.Neurologist), 4.8f, R.drawable.banner_telemedicine),
-        DoctorInfo(stringResource(R.string.Dr_Maria_Garcia), stringResource(R.string.Pediatrician), 5.0f, R.drawable.banner_telemedicine),
-        DoctorInfo(stringResource(R.string.Dr_Robert_Lee), stringResource(R.string.Dermatologist), 4.7f, R.drawable.banner_telemedicine)
+
+            Doctor(
+                id = "doc001",
+                name = "Dr. Sarah Wilson",
+                specialty = "Cardiologist",
+                imageUrl = "",
+                rating = 4.9f,
+                bio = "Expert in heart-related diseases with over 10 years of experience.",
+                email = "sarah.wilson@example.com",
+                availableTimes = listOf("10:00 AM", "2:00 PM", "5:00 PM"),
+                distance = "3.5 km",
+                ans = 50,
+                imageRes = R.drawable.banner_telemedicine,
+                upiId = "sarahwilson@upi",
+                consultationFee = 500.0,
+                phoneNumber = "+91 98765 43210"
+            ),
+    Doctor(
+        id = "doc002",
+        name = "Dr. James Chen",
+        specialty = "Neurologist",
+        imageUrl = "",
+        rating = 4.8f,
+        bio = "Specialist in brain and nervous system disorders.",
+        email = "james.chen@example.com",
+        availableTimes = listOf("11:00 AM", "3:00 PM", "6:00 PM"),
+        distance = "5.2 km",
+        ans = 40,
+        imageRes = R.drawable.banner_telemedicine,
+        upiId = "jameschen@upi",
+        consultationFee = 600.0,
+        phoneNumber = "+91 98765 43211"
+    ),
+    Doctor(
+        id = "doc003",
+        name = "Dr. Maria Garcia",
+        specialty = "Pediatrician",
+        imageUrl = "",
+        rating = 5.0f,
+        bio = "Child specialist with a friendly and comforting approach.",
+        email = "maria.garcia@example.com",
+        availableTimes = listOf("9:00 AM", "1:00 PM", "4:00 PM"),
+        distance = "2.0 km",
+        ans = 60,
+        imageRes = R.drawable.banner_telemedicine,
+        upiId = "mariagarcia@upi",
+        consultationFee = 450.0,
+        phoneNumber = "+91 98765 43212"
+    ),
+    Doctor(
+        id = "doc004",
+        name = "Dr. Robert Lee",
+        specialty = "Dermatologist",
+        imageUrl = "",
+        rating = 4.7f,
+        bio = "Experienced in treating skin, hair, and nail disorders.",
+        email = "robert.lee@example.com",
+        availableTimes = listOf("10:30 AM", "12:30 PM", "5:30 PM"),
+        distance = "4.8 km",
+        ans = 55,
+        imageRes = R.drawable.banner_telemedicine,
+        upiId = "robertlee@upi",
+        consultationFee = 550.0,
+        phoneNumber = "+91 98765 43213"
+    )
+
 
     )
 
@@ -110,7 +173,7 @@ fun SpecialistDoctorsSection(visible: Boolean, navController: NavController) {
 }
 
 @Composable
-fun DoctorCard(doctor: DoctorInfo, navController: NavController) {
+fun DoctorCard(doctor: Doctor, navController: NavController) {
     Card(
         modifier = Modifier
             .size(width = 160.dp, height = 250.dp)
@@ -581,14 +644,6 @@ fun SectionTitleWithViewAll(title: String, onViewAllClick: () -> Unit) {
         )
     }
 }
-
-// Data classes for the new sections
-data class DoctorInfo(
-    val name: String,
-    val specialty: String,
-    val rating: Float,
-    val imageRes: Int
-)
 
 data class HealthStat(
     val name: String,

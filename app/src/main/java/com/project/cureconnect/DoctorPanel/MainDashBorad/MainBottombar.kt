@@ -52,7 +52,7 @@ fun MainBottomBar(selectedItem: Int, navController: NavController, onItemSelecte
                 onClick = {
                     onItemSelected(index)
                     when (index) {
-                        0 -> navController.navigate(Screen.DoctorDashBoard.routes) // Already on home
+                        0 -> navController.navigate(Screen.DoctorDashBoard.routes)
                         1 -> navController.navigate(Screen.search.routes)
                         2 -> navController.navigate(Screen.Appointment.routes)
                         3 -> navController.navigate(Screen.profile.routes)

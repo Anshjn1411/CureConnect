@@ -44,6 +44,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import com.project.cureconnect.changeLanguage
 import com.project.cureconnect.getSavedLanguage
+import com.project.cureconnect.pateints.navigationRoutes.Screen
 
 // Step 2: Updated MainTopBar with integrated speech recognition
 @Composable
@@ -85,7 +86,7 @@ fun MainTopBar(navController: NavController, speechHelper: SpeechRecognitionHelp
 
             // Action Icons + Language Selector
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = { navController.navigate("my_appointments") }) {
+                IconButton(onClick = { navController.navigate(Screen.MyAppointment.routes) }) {
                     Icon(
                         imageVector = Icons.Default.Notifications,
                         contentDescription = "Notifications",

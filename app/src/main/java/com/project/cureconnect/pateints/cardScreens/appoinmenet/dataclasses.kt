@@ -16,7 +16,8 @@ data class Doctor(
     val ans: Int = 0,
     val imageRes: Int = 0,
     val upiId: String = "",
-    val consultationFee: Double = 0.0
+    val consultationFee: Double = 0.0,
+    val phoneNumber: String = ""
 
 )
 

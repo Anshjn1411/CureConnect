@@ -34,7 +34,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.project.cureconnect.MainDashBoard
+import com.project.cureconnect.R
 import com.project.cureconnect.pateints.mainScreens.MainBottomBar
+import com.project.cureconnect.pateints.navigationRoutes.Screen
+import kotlinx.coroutines.delay
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,12 +46,14 @@ fun AvailableDoctorsScreen(navController: NavController) {
     var selectedItem by remember { mutableStateOf(2) }
     var doctors by remember { mutableStateOf<List<Doctor>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
-    LaunchedEffect(Unit) {
+    // Sample doctors
 
-        fetchDoctorsFromFirestore { fetchedDoctors ->
-            doctors = fetchedDoctors
-            isLoading = false
-        }
+
+    LaunchedEffect(Unit) {
+        // Simulate loading delay
+        delay(1000)
+        doctors = sampleDoctors.sampleDoctors
+        isLoading = false
     }
     Scaffold(
         topBar = {
@@ -58,7 +63,7 @@ fun AvailableDoctorsScreen(navController: NavController) {
                     fontWeight = FontWeight.Bold , color = Color.Black
                 , modifier = Modifier.padding(start = 80.dp)) },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigate("main") }) {
+                    IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back"
@@ -103,4 +108,59 @@ fun AvailableDoctorsScreen(navController: NavController) {
             }
         }
     }
+}
+
+object sampleDoctors{
+    val sampleDoctors = listOf(
+        Doctor(
+            id = "doc1",
+            name = "Dr. Anjali Mehra",
+            specialty = "Cardiologist",
+            imageUrl = "", // Replace with real URL or drawable if needed
+            rating = 4.8f,
+            bio = "Expert in cardiac care with 10+ years of experience.",
+            email = "anjali.mehra@hospital.com",
+            availableTimes = listOf("10:00 AM", "02:00 PM", "06:00 PM"),
+            distance = "2.5 km",
+            ans = 120,
+            imageRes = R.drawable.doctor1,
+            upiId = "anjali@upi",
+            consultationFee = 500.0,
+            phoneNumber = "1234567890"
+        ),
+        Doctor(
+            id = "doc2",
+            name = "Dr. Rahul Sharma",
+            specialty = "Neurologist",
+            imageUrl = "",
+            rating = 4.6f,
+            bio = "Neurology specialist and researcher.",
+            email = "rahul.sharma@hospital.com",
+            availableTimes = listOf("11:00 AM", "03:30 PM"),
+            distance = "3.2 km",
+            ans = 98,
+            imageRes = R.drawable.doctor2,
+            upiId = "rahul@upi",
+            consultationFee = 600.0,
+            phoneNumber = "9876543210"
+        ),
+        Doctor(
+            id = "doc3",
+            name = "Dr. Priya Verma",
+            specialty = "Dermatologist",
+            imageUrl = "",
+            rating = 4.9f,
+            bio = "Skin and beauty expert with vast clinical experience.",
+            email = "priya.verma@hospital.com",
+            availableTimes = listOf("09:00 AM", "01:00 PM", "05:00 PM"),
+            distance = "1.8 km",
+            ans = 145,
+            imageRes = R.drawable.doctor3,
+            upiId = "priyaverma@upi",
+            consultationFee = 450.0,
+            phoneNumber = "5555555555"
+        )
+    )
+
+
 }

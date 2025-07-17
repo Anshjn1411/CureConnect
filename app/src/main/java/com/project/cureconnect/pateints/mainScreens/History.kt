@@ -1,5 +1,6 @@
 package com.project.cureconnect.pateints.mainScreens
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -25,7 +26,9 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.google.firebase.firestore.FirebaseFirestore
-import login.AuthViewModel
+import com.project.cureconnect.data.datastore.UserSessionLayer.CachedUser
+import com.project.cureconnect.data.datastore.UserSessionLayer.UserSessionManager
+
 
 // Data class matching Firebase document structure
 data class PatientHistoryRecord(
@@ -38,90 +41,102 @@ data class PatientHistoryRecord(
 @Composable
 fun PatientHistoryPage(
     navController: NavController,
-userId : String
 ) {
-    Log.d("userdataata", userId)
+    val context = LocalContext.current
+    val sessionManager = remember { UserSessionManager(context) }
+
     var historyRecords by remember { mutableStateOf(listOf<PatientHistoryRecord>()) }
     var isLoading by remember { mutableStateOf(true) }
+    var cachedUser by remember { mutableStateOf<CachedUser?>(null) }
 
-    // Fetch patient history from Firestore
-    LaunchedEffect(userId) {
-        val db = FirebaseFirestore.getInstance()
+    // Collect user data from session manager
+    LaunchedEffect(Unit) {
+        sessionManager.userData.collect { user ->
+            cachedUser = user
 
-        // Get the "history" collection directly
-        db.collection("patients")
-            .document(userId)
-            .collection("history")
-            .get()
-            .addOnSuccessListener { documents ->
-                historyRecords = documents.map { document ->
-                    PatientHistoryRecord(
-                        recordId = document.id,
-                        imageUrl = document.getString("imageUrl") ?: "",
-                        response = document.getString("response") ?: "No response available"
-                    )
-                }
-                isLoading = false
+            user?.name?.let { userName ->
+                val db = FirebaseFirestore.getInstance()
+                Log.d("Firestore", "User name: $userName")
+
+                db.collection("patients")
+                    .document(userName)
+                    .collection("history")
+                    .get()
+                    .addOnSuccessListener { documents ->
+                        Log.d("Firestore", "History documents: ${documents.documents}")
+                        historyRecords = documents.map { document ->
+                            PatientHistoryRecord(
+                                recordId = document.id,
+                                imageUrl = document.getString("imageUrl") ?: "",
+                                response = document.getString("response") ?: "No response available"
+                            )
+                        }
+                        isLoading = false
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.e("Firestore", "Error fetching history", exception)
+                        isLoading = false
+                    }
             }
-            .addOnFailureListener { exception ->
-                println("Error fetching history: ${exception.message}")
-                isLoading = false
-            }
+        }
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Patient History" , color = Color.Black , fontSize = 20.sp) },
+                title = { Text("Patient History", color = Color.Black, fontSize = 20.sp) },
                 navigationIcon = {
-                    IconButton(onClick = {navController.navigateUp()}) {
+                    IconButton(onClick = { navController.navigateUp() }) {
                         Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
         }
     ) { paddingValues ->
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else if (historyRecords.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("No history records found")
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
+        when {
+            isLoading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
                 }
+            }
 
-                items(historyRecords) { record ->
-                    ImprovedHistoryRecordItem(record)
+            historyRecords.isEmpty() -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("No history records found")
                 }
+            }
 
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
+            else -> {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    item { Spacer(modifier = Modifier.height(8.dp)) }
+
+                    items(historyRecords) { record ->
+                        ImprovedHistoryRecordItem(record)
+                    }
+
+                    item { Spacer(modifier = Modifier.height(8.dp)) }
                 }
             }
         }
     }
 }
+
 
 @Composable
 fun ImprovedHistoryRecordItem(record: PatientHistoryRecord) {

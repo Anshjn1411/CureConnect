@@ -66,7 +66,7 @@ import com.project.cureconnect.DoctorPanel.NavigationRoutes.Screen
 import com.project.cureconnect.R
 
 import kotlinx.coroutines.delay
-import login.AuthViewModel
+import com.project.cureconnect.login.AuthViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 

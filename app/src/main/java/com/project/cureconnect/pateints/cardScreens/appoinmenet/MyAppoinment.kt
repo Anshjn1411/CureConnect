@@ -1,6 +1,8 @@
 package com.project.cureconnect.pateints.cardScreens.appoinmenet
 
+import android.content.Context
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
@@ -48,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -57,36 +60,31 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.project.cureconnect.DoctorPanel.MainDashBorad.appointments
 import com.project.cureconnect.R
-import com.zego.ve.Log
-import login.AuthViewModel
-
+import com.project.cureconnect.data.datastore.UserSessionLayer.CachedUser
+import com.project.cureconnect.data.datastore.UserSessionLayer.UserSessionManager
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyAppointmentsScreen(navController: NavController , appoinmenetViewModel: AppoinmenetViewModel = viewModel() , authViewModel: AuthViewModel= viewModel()) {
+fun MyAppointmentsScreen(navController: NavController , appoinmenetViewModel: AppoinmenetViewModel = viewModel() ) {
     var appointment by remember { mutableStateOf<List<Appointment>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var userId by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var number by remember { mutableStateOf("") }
+    val context: Context = LocalContext.current
     var doctors by remember { mutableStateOf<List<Doctor>>(emptyList()) }
+    val sessionManager = remember { UserSessionManager(context) }
+
+
+    var cachedUser by remember { mutableStateOf<CachedUser?>(null) }
+
 
 // Fetch user details first
     LaunchedEffect(Unit) {
-        authViewModel.getUserData { user ->
-            userId = user?.userId ?: ""
-            name = user?.name ?: ""
-            number = user?.phone ?: ""
-
-            Log.d("detail", "User ID: $userId, Name: $name, Number: $number")
-
-            // Fetch doctors once user data is available
-            fetchDoctorsFromFirestore { fetchedDoctors ->
-                doctors = fetchedDoctors
-                Log.d("detaildoctor", doctors.toString())
-            }
-
+        sessionManager.userData.collect { user ->
+            cachedUser = user
+            name = cachedUser?.uid.toString()
             // Fetch appointments only if userId is available
             if (name.isNotEmpty()) {
                 fetchAppointmentByIDFromFirestore(name) { fetchedAppointments ->
@@ -101,7 +99,13 @@ fun MyAppointmentsScreen(navController: NavController , appoinmenetViewModel: Ap
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("My Appointments", fontSize = 18.sp, fontWeight = FontWeight.Medium) },
+                title = {
+                    Text(
+                        "My Appointments",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -227,14 +231,27 @@ fun MyAppointmentsScreen(navController: NavController , appoinmenetViewModel: Ap
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
-
-                        items(appointment) { appointment ->
-                            doctors.find { it.id == appointment.doctorId }?.let {
-                                AppointmentCard(
-                                    appointment = appointment,
-                                    it, navController = navController, appoinmenetViewModel
-                                )
-                            }
+                        items(appointment) { singleAppointment ->
+                            sampleDoctors.sampleDoctors.find { it.id == singleAppointment.doctorId }
+                                ?.let { doctor ->
+                                    Log.d("detailappoinmment", singleAppointment.toString())
+                                    AppointmentCard(
+                                        appointment = singleAppointment,
+                                        doctor = doctor,
+                                        navController = navController,
+                                        appoinmenetViewModel = appoinmenetViewModel,
+                                        onCancel = { canceledAppointment ->
+                                            appoinmenetViewModel.cancelAppointment(
+                                                canceledAppointment
+                                            ) { success ->
+                                                if (success) {
+                                                    appointment =
+                                                        appointment.filter { it.id != canceledAppointment.id }
+                                                }
+                                            }
+                                        }
+                                    )
+                                }
                         }
                     }
                 }
@@ -244,178 +261,188 @@ fun MyAppointmentsScreen(navController: NavController , appoinmenetViewModel: Ap
 }
 
 
-@Composable
-fun AppointmentCard(appointment: Appointment, doctor: Doctor,navController: NavController, appoinmenetViewModel: AppoinmenetViewModel) {
-
-
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        )
+    @Composable
+    fun AppointmentCard(
+        appointment: Appointment, doctor: Doctor,
+        navController: NavController,
+        appoinmenetViewModel: AppoinmenetViewModel,
+        onCancel: (Appointment) -> Unit
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            // Doctor info row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Doctor Image
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xFFF5F7FA))
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.doctor1),
-                        contentDescription = "Doctor Image",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                }
 
-                // Doctor name and specialty
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 12.dp)
-                ) {
-                    Text(
-                        text = doctor?.name ?: "Unknown Doctor",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+        Log.d("detailappoinmment", appointment.toString())
 
-                    Text(
-                        text = doctor?.specialty ?: "Unknown Specialty",
-                        fontSize = 14.sp,
-                        color = Color.Gray,
-                        modifier = Modifier.padding(top = 2.dp)
-                    )
-                }
 
-                // Status chip
-                Box(
-                    modifier = Modifier
-                        .background(
-                            color = when(appointment.status) {
-                                "Scheduled" -> Color(0xFFE8F5E9)
-                                "Cancelled" -> Color(0xFFFFEBEE)
-                                else -> Color(0xFFF5F7FA)
-                            },
-                            shape = RoundedCornerShape(16.dp)
-                        )
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = appointment.status,
-                        fontSize = 12.sp,
-                        color = when(appointment.status) {
-                            "Scheduled" -> Color(0xFF43A047)
-                            "Cancelled" -> Color(0xFFE53935)
-                            else -> Color.Gray
-                        }
-                    )
-                }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Divider
-            Divider(
-                color = Color(0xFFF5F7FA),
-                thickness = 1.dp,
-                modifier = Modifier.padding(vertical = 8.dp)
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White
             )
-
-            // Date and time info
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
             ) {
-                // Date column
-                Column(
-                    modifier = Modifier.weight(1f)
+                // Doctor info row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Date",
-                        fontSize = 12.sp,
-                        color = Color.Gray
-                    )
+                    // Doctor Image
+                    Box(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color(0xFFF5F7FA))
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.doctor1),
+                            contentDescription = "Doctor Image",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
 
-                    Text(
-                        text = appointment.date,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
+                    // Doctor name and specialty
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 12.dp)
+                    ) {
+                        Text(
+                            text = doctor?.name ?: "Unknown Doctor",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+
+                        Text(
+                            text = doctor?.specialty ?: "Unknown Specialty",
+                            fontSize = 14.sp,
+                            color = Color.Gray,
+                            modifier = Modifier.padding(top = 2.dp)
+                        )
+                    }
+
+                    // Status chip
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                color = when (appointment.status) {
+                                    "Scheduled" -> Color(0xFFE8F5E9)
+                                    "Cancelled" -> Color(0xFFFFEBEE)
+                                    else -> Color(0xFFF5F7FA)
+                                },
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = appointment.status,
+                            fontSize = 12.sp,
+                            color = when (appointment.status) {
+                                "Scheduled" -> Color(0xFF43A047)
+                                "Cancelled" -> Color(0xFFE53935)
+                                else -> Color.Gray
+                            }
+                        )
+                    }
                 }
 
-                // Time column
-                Column(
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        text = "Time",
-                        fontSize = 12.sp,
-                        color = Color.Gray
-                    )
+                Spacer(modifier = Modifier.height(16.dp))
 
-                    Text(
-                        text = appointment.time,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
+                // Divider
+                Divider(
+                    color = Color(0xFFF5F7FA),
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+
+                // Date and time info
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Date column
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = "Date",
+                            fontSize = 12.sp,
+                            color = Color.Gray
+                        )
+
+                        Text(
+                            text = appointment.date,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+
+                    // Time column
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = "Time",
+                            fontSize = 12.sp,
+                            color = Color.Gray
+                        )
+
+                        Text(
+                            text = appointment.time,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            // Action buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Cancel button
-                OutlinedButton(
-                    onClick = { appoinmenetViewModel.cancelAppointment(appointment) { success ->
-                        if (success) {
-
-                        } else {
-
-                        }
-                    }},
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(28.dp),
-                    border = BorderStroke(1.dp, Color(0xFFE0E0E0)),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = Color.Gray
-                    )
+                // Action buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text("Cancel")
-                }
+                    // Cancel button
+                    OutlinedButton(
+                        onClick = {
+                            appoinmenetViewModel.cancelAppointment(appointment) { success ->
+                                if (success) {
+                                    onCancel(appointment)
 
-                // Reschedule button
-                Button(
-                    onClick = { navController.navigate("doctor_details/${doctor?.id}") },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(28.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF4285F4)
-                    )
-                ) {
-                    Text("Reschedule")
+                                } else {
+
+                                }
+                            }
+                        },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(28.dp),
+                        border = BorderStroke(1.dp, Color(0xFFE0E0E0)),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = Color.Gray
+                        )
+                    ) {
+                        Text("Cancel")
+                    }
+
+                    // Reschedule button
+                    Button(
+                        onClick = { navController.navigate("doctor_details/${doctor?.id}") },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(28.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF4285F4)
+                        )
+                    ) {
+                        Text("Reschedule")
+                    }
                 }
             }
         }
     }
-}
