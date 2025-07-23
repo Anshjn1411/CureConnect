@@ -12,37 +12,26 @@ import com.project.cureconnect.R
 val comic = FontFamily(
     Font(R.font.comicneuebold )
 )
-// Set of Material typography styles to start with
-val Typography = Typography(
 
-    /* Other default text styles to override
-    titleLarge = TextStyle(
-        fontFamily = FontFamily.Default,
+val CureConnectTypography = Typography(
+    headlineLarge = TextStyle(
+        fontSize = 24.sp,
+        fontWeight = FontWeight.Bold,
+        color = DarkText
+    ),
+    titleMedium = TextStyle(
+        fontSize = 18.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = DarkText
+    ),
+    bodyMedium = TextStyle(
+        fontSize = 14.sp,
         fontWeight = FontWeight.Normal,
-        fontSize = 22.sp,
-        lineHeight = 28.sp,
-        letterSpacing = 0.sp
+        color = LightText
     ),
     labelSmall = TextStyle(
-        fontFamily = FontFamily.Default,
+        fontSize = 12.sp,
         fontWeight = FontWeight.Medium,
-        fontSize = 11.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.5.sp
+        color = LightText
     )
-    */
-            bodyLarge = TextStyle(
-            fontFamily = comic,  // Use your custom font
-    fontWeight = FontWeight.Normal,
-    fontSize = 16.sp,
-    lineHeight = 24.sp,
-    letterSpacing = 0.5.sp
-),
-titleLarge = TextStyle(
-fontFamily = comic,
-fontWeight = FontWeight.Bold,
-fontSize = 100.sp,  // Match your original Text size
-color = Color.White
-)
-
 )

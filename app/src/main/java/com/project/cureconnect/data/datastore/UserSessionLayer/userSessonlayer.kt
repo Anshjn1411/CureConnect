@@ -3,7 +3,8 @@ package com.project.cureconnect.data.datastore.UserSessionLayer
 import android.content.Context
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
-import com.project.cureconnect.login.User
+import com.project.cureconnect.presentation.screens.AuthScreen.User
+import com.project.cureconnect.presentation.screens.pateints.CardScreen.appoinmenet.Doctor
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -20,7 +21,8 @@ data class CachedUser(
     val uid: String,
     val name: String,
     val email: String,
-    val phone: String
+    val phone: String,
+    val role :String="",
 )
 
 
@@ -46,7 +48,19 @@ class UserSessionManager(private val context: Context) {
             uid = user.uid,
             name = user.name,
             email = user.email,
-            phone = user.phone
+            phone = user.phone,
+            role = user.role
+        )
+        val json = Json.encodeToString(cached)
+        context.dataStore.edit { it[USER_JSON] = json }
+    }
+    suspend fun saveDoctor(user: Doctor) {
+        val cached = CachedUser(
+            uid = user.uid,
+            name = user.name,
+            email = user.email,
+            phone = user.phoneNumber,
+            role= user.role
 
         )
         val json = Json.encodeToString(cached)
@@ -54,6 +68,9 @@ class UserSessionManager(private val context: Context) {
     }
 
     suspend fun clearUser() {
+        context.dataStore.edit { it.clear() }
+    }
+    suspend fun clearDoctor() {
         context.dataStore.edit { it.clear() }
     }
 }

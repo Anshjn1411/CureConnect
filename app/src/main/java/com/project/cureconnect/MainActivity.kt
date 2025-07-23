@@ -26,7 +26,7 @@ import androidx.navigation.compose.rememberNavController
 
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.project.cureconnect.pateints.navigationRoutes.AppHost
+import com.project.cureconnect.presentation.navigationRoutes.AppHost
 import java.util.Locale
 
 import com.project.cureconnect.ui.theme.CureConnectTheme
