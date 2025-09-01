@@ -1,7 +1,7 @@
 package com.project.cureconnect.data.model.Constant
 
 object ApiKeys{
-    val emergencynumber = "" // IVR NUMBER
+    val emergencynumber = "+917489869943" // IVR NUMBER
 }
 object emailSMPT {
     val email = "cureconnect0@gmail.com" // SMTP Email

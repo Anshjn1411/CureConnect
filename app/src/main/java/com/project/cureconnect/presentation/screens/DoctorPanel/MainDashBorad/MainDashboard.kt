@@ -31,12 +31,14 @@ import androidx.compose.material.icons.filled.PersonSearch
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.VideoCall
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -56,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.project.cureconnect.presentation.screens.DoctorPanel.NavigationRoutesDoctor.Screen
 import com.project.cureconnect.R
+import com.project.cureconnect.ServiceItem
 
 import kotlinx.coroutines.delay
 import java.time.LocalDate
@@ -63,13 +66,11 @@ import java.time.format.DateTimeFormatter
 
 val primaryBlue = Color(0xFF4285F4)
 val lightGrey = Color(0xFFF5F7FA)
-val darkBlue = Color(0xFF3367D6)
-val accentGreen = Color(0xFF34A853)
-val accentRed = Color(0xFFEA4335)
-val accentYellow = Color(0xFFFBBC05)
+
 
 @Composable
 fun DoctorDashBoard(navController: NavController ) {
+    var showDialog by remember { mutableStateOf(false) }
     var selectedItem by remember { mutableStateOf(0) }
     var isLoaded by remember { mutableStateOf(false) }
 
@@ -140,55 +141,6 @@ fun DoctorDashBoard(navController: NavController ) {
                     }
                 }
 
-                // Summary metrics
-                item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        MetricCard(
-                            title = "Today's Patients",
-                            value = appointments.size.toString(),
-                            icon = Icons.Default.PersonSearch,
-                            color = primaryBlue,
-                            modifier = Modifier.weight(1f)
-                        )
-                        MetricCard(
-                            title = "Pending Consults",
-                            value = appointments.size.toString(),
-                            icon = Icons.Default.Schedule,
-                            color = accentYellow,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-
-                item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        MetricCard(
-                            title = "Weekly Stats",
-                            value = "+8.5%",
-                            icon = Icons.Default.TrendingUp,
-                            color = accentGreen,
-                            modifier = Modifier.weight(1f)
-                        )
-                        MetricCard(
-                            title = "Urgent Cases",
-                            value = "0",
-                            icon = Icons.Default.FilterAlt,
-                            color = accentRed,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-
                 // Services section
                 item {
                     AnimatedVisibility(
@@ -236,10 +188,14 @@ fun DoctorDashBoard(navController: NavController ) {
                                     text = "View All",
                                     color = primaryBlue,
                                     modifier = Modifier.clickable {
-                                        navController.navigate(Screen.Appointment.routes)
+                                        showDialog = true
                                     }
                                 )
                             }
+                            UnderDevelopmentDialog(
+                                showDialog = showDialog,
+                                onDismiss = { showDialog = false }
+                            )
 
                             Spacer(modifier = Modifier.height(8.dp))
                         }
@@ -248,11 +204,7 @@ fun DoctorDashBoard(navController: NavController ) {
 
 
 
-//                items(appointments) { appointment ->
-//                    AppointmentCard(appointment = appointment!!, navController = navController)
-//                }
 
-                // Bottom spacing
                 item { Spacer(modifier = Modifier.height(24.dp)) }
             }
         }
@@ -358,6 +310,7 @@ fun DoctorServiceArea(navController: NavController) {
 
 @Composable
 fun ServiceCard(service: ServiceItem, navController: NavController, modifier: Modifier = Modifier) {
+    var showDialog by remember { mutableStateOf(false) }
     var isPressed by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.95f else 1f,
@@ -387,8 +340,7 @@ fun ServiceCard(service: ServiceItem, navController: NavController, modifier: Mo
             )
             .clickable {
                 isPressed = true
-                // Navigate after a small delay to show the press animation
-                navController.navigate(service.route)
+                showDialog = true
                 isPressed = false
             },
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -424,7 +376,33 @@ fun ServiceCard(service: ServiceItem, navController: NavController, modifier: Mo
                 fontWeight = FontWeight.Medium,
                 color = Color.DarkGray
             )
+            UnderDevelopmentDialog(
+                showDialog = showDialog,
+                onDismiss = { showDialog = false }
+            )
         }
+    }
+}
+
+
+@Composable
+fun UnderDevelopmentDialog(
+    showDialog: Boolean,
+    onDismiss: () -> Unit
+) {
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { onDismiss() },
+            title = { Text("Feature in Development") },
+            text = {
+                Text("This panel is under development.\nPlease logout and login as a patient.")
+            },
+            confirmButton = {
+                TextButton(onClick = { onDismiss() }) {
+                    Text("OK")
+                }
+            }
+        )
     }
 }
 

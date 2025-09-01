@@ -64,41 +64,13 @@ fun SplashScreen(navController: NavHostController, authViewModel: AuthViewModel)
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Logo with modern styling
-            Box(
-                modifier = Modifier
-                    .size(120.dp)
-                    .background(
-                        color = PrimaryBlue.copy(alpha = 0.1f),
-                        shape = MaterialTheme.shapes.large
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
+
                 Image(
                     painter = painterResource(id = R.drawable.cureconnect_logo),
                     contentDescription = "CureConnect Logo",
                     modifier = Modifier.size(80.dp)
                 )
-            }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = "Healthcare",
-                style = MaterialTheme.typography.headlineLarge.copy(
-                    color = SecondaryTealDark,
-                    fontWeight = FontWeight.Bold
-                )
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "Medical app",
-                style = MaterialTheme.typography.titleMedium.copy(
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            )
         }
     }
 }

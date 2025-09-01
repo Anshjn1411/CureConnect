@@ -1,8 +1,11 @@
 package com.project.cureconnect.presentation.screens.AuthScreen
 
 import android.util.Log
+import android.util.Patterns
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -42,6 +45,7 @@ class AuthViewModel(private val sessionManager: UserSessionManager) : ViewModel(
     init {
         autoLogin()
     }
+
 
     private fun autoLogin() {
         viewModelScope.launch {
@@ -134,7 +138,8 @@ class AuthViewModel(private val sessionManager: UserSessionManager) : ViewModel(
         name: String,
         email: String,
         password: String,
-        phone: String
+        phone: String,
+        onSuccess: () -> Unit
     ) {
         _loading.value = true
         Log.d("Signup", "🔄 Starting signup process for: $email")
@@ -157,7 +162,8 @@ class AuthViewModel(private val sessionManager: UserSessionManager) : ViewModel(
                         uid = uid,
                         name = name,
                         email = email,
-                        phone = phone
+                        phone = phone,
+                        role = "user"
                     )
 
                     firestore.collection("users").document(uid).set(newUser)
@@ -170,6 +176,7 @@ class AuthViewModel(private val sessionManager: UserSessionManager) : ViewModel(
                             viewModelScope.launch {
                                 try {
                                     sessionManager.saveUser(newUser)
+                                    onSuccess()
                                     Log.d("Signup", "✅ User saved in session manager.")
                                 } catch (e: Exception) {
                                     Log.e("Signup", "❌ Error saving user in session manager: ${e.localizedMessage}")

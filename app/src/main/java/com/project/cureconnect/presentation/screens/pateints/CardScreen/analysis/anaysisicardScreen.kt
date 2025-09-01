@@ -7,7 +7,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -23,7 +22,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.project.cureconnect.data.datastore.UserSessionLayer.CachedUser
@@ -38,23 +36,25 @@ data class AnalysisItem(
     val description: String,
     val color: Color,
     val specialty: String,
-    val routes : String
+    val routes: String
 )
 
 @Composable
 fun AnalysisCard(
     analysis: AnalysisItem,
     navController: NavController,
-    Id : String,
+    Id: String,
     modifier: Modifier = Modifier,
-
-    ) {
+) {
     Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(8.dp),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        shape = MaterialTheme.shapes.large,
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Column(
             modifier = Modifier
@@ -71,7 +71,7 @@ fun AnalysisCard(
                     modifier = Modifier
                         .size(48.dp)
                         .clip(CircleShape)
-                        .background(analysis.color.copy(alpha = 0.1f)),
+                        .background(analysis.color.copy(alpha = 0.12f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -87,7 +87,7 @@ fun AnalysisCard(
                 Text(
                     text = analysis.title,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
 
@@ -102,16 +102,18 @@ fun AnalysisCard(
             // Start Analysis Button
             Button(
                 onClick = {
-                    navController.navigate("analysis/${analysis.id}") },
+                    navController.navigate("analysis/${analysis.id}")
+                },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = analysis.color.copy(alpha = 0.1f),
+                    containerColor = analysis.color.copy(alpha = 0.12f),
                     contentColor = analysis.color
-                )
+                ),
+                shape = MaterialTheme.shapes.medium
             ) {
                 Text(
                     text = "Start Analysis →",
-                    color = analysis.color
+                    style = MaterialTheme.typography.labelLarge
                 )
             }
         }
@@ -120,7 +122,7 @@ fun AnalysisCard(
 
 @Composable
 fun MedicalAnalysisDashboard(navController: NavController) {
-    val context : Context = LocalContext.current
+    val context: Context = LocalContext.current
     val sessionManager = remember { UserSessionManager(context) }
 
     var id by remember { mutableStateOf("") }
@@ -133,34 +135,29 @@ fun MedicalAnalysisDashboard(navController: NavController) {
         }
     }
 
-
-    Column(
-        modifier = Modifier.fillMaxSize()
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
     ) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            ExtraArea(navController)
 
-
-                ExtraArea(navController)
-
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(1),
-                    contentPadding = PaddingValues(8.dp)
-                ) {
-                    items(analyses) { analysis ->
-                        AnalysisCard(analysis, navController, id)
-                    }
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(1),
+                contentPadding = PaddingValues(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(analyses) { analysis ->
+                    AnalysisCard(analysis, navController, id)
                 }
-
-
+            }
         }
-
-
     }
+}
 
-
-
-
-
-object Sampledataana{
+object Sampledataana {
     val analyses = listOf(
         AnalysisItem(
             id = "0",
@@ -173,7 +170,6 @@ object Sampledataana{
         ),
         AnalysisItem(
             id = "1",
-
             icon = Icons.Default.Favorite,
             title = "ECG Analysis",
             description = "Real-time electrocardiogram analysis for comprehensive heart monitoring",

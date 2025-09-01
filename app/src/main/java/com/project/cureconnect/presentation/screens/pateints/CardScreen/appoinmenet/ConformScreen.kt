@@ -1,9 +1,5 @@
 package com.project.cureconnect.presentation.screens.pateints.CardScreen.appoinmenet
 
-
-
-import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,21 +14,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -41,42 +33,38 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.vector.ImageVector
+import com.project.cureconnect.data.datastore.UserSessionLayer.CachedUser
 import com.project.cureconnect.presentation.navigationRoutes.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppointmentConfirmationScreen(navController: NavController , doctor: Doctor) {
+fun AppointmentConfirmationScreen(navController: NavController, doctor: Doctor ) {
     val scrollState = rememberScrollState()
-
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Appointment Confirmed", fontSize = 18.sp, fontWeight = FontWeight.Medium) },
+                title = {
+                    Text(
+                        text = "Appointment Confirmed",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             )
         },
-        containerColor = Color.White
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -90,53 +78,80 @@ fun AppointmentConfirmationScreen(navController: NavController , doctor: Doctor)
                 modifier = Modifier
                     .size(80.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFF4CAF50).copy(alpha = 0.1f)),
+                    .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = "Success",
-                    tint = Color(0xFF4CAF50),
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(40.dp)
                 )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            Text("Thank You!", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+
+            Text(
+                text = "Thank You!",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Your appointment has been confirmed", fontSize = 16.sp, color = Color.Gray, textAlign = TextAlign.Center)
+
+            Text(
+                text = "Your appointment has been confirmed",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+
             Spacer(modifier = Modifier.height(32.dp))
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                shape = RoundedCornerShape(16.dp)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                shape = MaterialTheme.shapes.medium
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
                         Box(
                             modifier = Modifier
                                 .size(64.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(Color(0xFFF5F7FA))
+                                .clip(MaterialTheme.shapes.small)
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
                         ) {}
 
                         Spacer(modifier = Modifier.width(16.dp))
+
                         Column {
-                            Text(doctor.name, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
-                            Text(doctor.specialty, fontSize = 14.sp, color = Color.Gray)
+                            Text(
+                                text = doctor.name,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+
+                            Text(
+                                text = doctor.specialty,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Divider(color = Color(0xFFEEEEEE), thickness = 1.dp)
+
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    DetailItem(Icons.Default.CalendarMonth, "Date", "April 15, 2025")
-                    Spacer(modifier = Modifier.height(16.dp))
-                    DetailItem(Icons.Default.Schedule, "Time", "10:30 AM")
-                    Spacer(modifier = Modifier.height(16.dp))
-                    DetailItem(Icons.Default.Person, "Patient", "John Doe")
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                        thickness = 1.dp
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
                 }
             }
 
@@ -144,391 +159,41 @@ fun AppointmentConfirmationScreen(navController: NavController , doctor: Doctor)
 
             Button(
                 onClick = { navController.navigate(Screen.MyAppointment.routes) },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                shape = RoundedCornerShape(28.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4285F4))
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = MaterialTheme.shapes.large,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
             ) {
-                Text("View My Appointments", fontSize = 16.sp)
+                Text(
+                    text = "View My Appointments",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = { navController.navigate(Screen.MainDashBoard.routes) },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                shape = RoundedCornerShape(28.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = MaterialTheme.shapes.large,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
             ) {
-                Text("Back to Home", fontSize = 16.sp, color = Color(0xFF4285F4))
+                Text(
+                    text = "Back to Home",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }
 }
 
-@Composable
-fun DetailItem(icon: ImageVector, title: String, value: String) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-        Icon(imageVector = icon, contentDescription = title, tint = Color(0xFF4285F4), modifier = Modifier.size(22.dp))
-        Spacer(modifier = Modifier.width(12.dp))
-        Column {
-            Text(text = title, fontSize = 14.sp, color = Color.Gray)
-            Text(text = value, fontSize = 16.sp, fontWeight = FontWeight.Medium, color = Color.Black)
-        }
-    }
-}
-
-
-
-
-
-
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Composable
-//fun AppointmentConfirmationScreen(
-//    appointmentId: String = "5260ad05-6b2a-4ab6-97c4-c4180c65e408",
-//    doctorId: String = "3",
-//    patientName: String = "John Doe",
-//    navController: NavController
-//) {
-//    val scrollState = rememberScrollState()
-//    var appointment by remember { mutableStateOf(Appointment()) }
-//    var doctor by remember { mutableStateOf(Doctor()) }
-//    var isLoading by remember { mutableStateOf(true) }
-//
-//
-//    LaunchedEffect(appointmentId, doctorId) {
-//        fetchAppointmentByID(appointmentId) { fetchedAppointment ->
-//            appointment = fetchedAppointment!!
-//            Log.d("checknuifn", fetchedAppointment.toString())
-//            if (fetchedAppointment != null) isLoading = false
-//        }
-//        fetchDoctorByID(doctorId) { fetchedDoctor ->
-//            doctor = fetchedDoctor!!
-//            Log.d("checknuifn", fetchedDoctor.toString())
-//            if (fetchedDoctor != null) isLoading = false
-//        }
-//    }
-//
-//    Scaffold(
-//        topBar = {
-//            TopAppBar(
-//                title = { Text("Appointment Confirmed", fontSize = 18.sp, fontWeight = FontWeight.Medium) },
-//                colors = TopAppBarDefaults.topAppBarColors(
-//                    containerColor = Color.White
-//                )
-//            )
-//        },
-//        containerColor = Color.White
-//    ) { paddingValues ->
-//        Column(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(paddingValues)
-//                .verticalScroll(scrollState)
-//                .padding(16.dp),
-//            horizontalAlignment = Alignment.CenterHorizontally
-//        ) {
-//            // Success Icon
-//            Box(
-//                modifier = Modifier
-//                    .size(80.dp)
-//                    .clip(CircleShape)
-//                    .background(Color(0xFF4CAF50).copy(alpha = 0.1f)),
-//                contentAlignment = Alignment.Center
-//            ) {
-//                Icon(
-//                    imageVector = Icons.Default.Check,
-//                    contentDescription = "Success",
-//                    tint = Color(0xFF4CAF50),
-//                    modifier = Modifier.size(40.dp)
-//                )
-//            }
-//
-//            Spacer(modifier = Modifier.height(16.dp))
-//
-//            // Thank you message
-//            Text(
-//                text = "Thank You!",
-//                fontSize = 24.sp,
-//                fontWeight = FontWeight.Bold,
-//                color = Color.Black
-//            )
-//
-//            Spacer(modifier = Modifier.height(8.dp))
-//
-//            Text(
-//                text = "Your appointment has been confirmed",
-//                fontSize = 16.sp,
-//                color = Color.Gray,
-//                textAlign = TextAlign.Center
-//            )
-//
-//            Spacer(modifier = Modifier.height(32.dp))
-//
-//            // Appointment Details Card
-//            Card(
-//                modifier = Modifier.fillMaxWidth(),
-//                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-//                colors = CardDefaults.cardColors(containerColor = Color.White),
-//                shape = RoundedCornerShape(16.dp)
-//            ) {
-//                Column(
-//                    modifier = Modifier.padding(16.dp)
-//                ) {
-//                    // Doctor Info
-//                    Row(
-//                        verticalAlignment = Alignment.CenterVertically,
-//                        modifier = Modifier.fillMaxWidth()
-//                    ) {
-//                        // Doctor Image
-//                        Box(
-//                            modifier = Modifier
-//                                .size(64.dp)
-//                                .clip(RoundedCornerShape(8.dp))
-//                                .background(Color(0xFFF5F7FA))
-//                        ) {
-//                            doctor.imageRes.let { painterResource(it) }?.let {
-//                                Image(
-//                                    painter = it,
-//                                    contentDescription = "Doctor Image",
-//                                    modifier = Modifier.fillMaxSize(),
-//                                    contentScale = ContentScale.Crop
-//                                )
-//                            }
-//                        }
-//
-//                        Spacer(modifier = Modifier.width(16.dp))
-//
-//                        // Doctor Details
-//                        Column {
-//                            Text(
-//                                text = doctor.name,
-//                                fontSize = 18.sp,
-//                                fontWeight = FontWeight.SemiBold
-//                            )
-//
-//                            Text(
-//                                text = doctor.specialty,
-//                                fontSize = 14.sp,
-//                                color = Color.Gray
-//                            )
-//                        }
-//                    }
-//
-//                    Spacer(modifier = Modifier.height(24.dp))
-//                    Divider(color = Color(0xFFEEEEEE), thickness = 1.dp)
-//                    Spacer(modifier = Modifier.height(24.dp))
-//
-//                    // Appointment Details
-//                    DetailItem(
-//                        icon = Icons.Default.CalendarMonth,
-//                        title = "Date",
-//                        value = doctor.availableTimes.get(0)
-//                    )
-//
-//                    Spacer(modifier = Modifier.height(16.dp))
-//
-//                    DetailItem(
-//                        icon = Icons.Default.Schedule,
-//                        title = "Time",
-//                        value = doctor.availableTimes.get(0)
-//                    )
-//
-//                    Spacer(modifier = Modifier.height(16.dp))
-//
-//                    DetailItem(
-//                        icon = Icons.Default.Person,
-//                        title = "Patient",
-//                        value = patientName
-//                    )
-//
-//                }
-//            }
-//
-//            Spacer(modifier = Modifier.height(24.dp))
-//
-//            // Additional Information
-//            Card(
-//                modifier = Modifier.fillMaxWidth(),
-//                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-//                colors = CardDefaults.cardColors(containerColor = Color.White),
-//                shape = RoundedCornerShape(16.dp)
-//            ) {
-//                Column(
-//                    modifier = Modifier.padding(16.dp)
-//                ) {
-//                    Text(
-//                        text = "Additional Information",
-//                        fontSize = 16.sp,
-//                        fontWeight = FontWeight.SemiBold
-//                    )
-//
-//                    Spacer(modifier = Modifier.height(12.dp))
-//
-//                    Text(
-//                        text = "• Please arrive 15 minutes before your appointment time",
-//                        fontSize = 14.sp,
-//                        color = Color.DarkGray
-//                    )
-//
-//                    Spacer(modifier = Modifier.height(8.dp))
-//
-//                    Text(
-//                        text = "• Bring your insurance card and ID",
-//                        fontSize = 14.sp,
-//                        color = Color.DarkGray
-//                    )
-//
-//                    Spacer(modifier = Modifier.height(8.dp))
-//
-//                    Text(
-//                        text = "• If you need to cancel, please do so 24 hours in advance",
-//                        fontSize = 14.sp,
-//                        color = Color.DarkGray
-//                    )
-//                }
-//            }
-//
-//            Spacer(modifier = Modifier.height(24.dp))
-//
-//            // Contact Us
-//            Card(
-//                modifier = Modifier.fillMaxWidth(),
-//                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-//                colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F7FA)),
-//                shape = RoundedCornerShape(16.dp)
-//            ) {
-//                Column(
-//                    modifier = Modifier.padding(16.dp)
-//                ) {
-//                    Text(
-//                        text = "Have Questions?",
-//                        fontSize = 16.sp,
-//                        fontWeight = FontWeight.SemiBold
-//                    )
-//
-//                    Spacer(modifier = Modifier.height(12.dp))
-//
-//                    Row(
-//                        verticalAlignment = Alignment.CenterVertically
-//                    ) {
-//                        Icon(
-//                            imageVector = Icons.Default.Email,
-//                            contentDescription = "Email",
-//                            tint = Color(0xFF4285F4),
-//                            modifier = Modifier.size(18.dp)
-//                        )
-//
-//                        Spacer(modifier = Modifier.width(8.dp))
-//
-//                        Text(
-//                            text = "support@cureconnect.com",
-//                            fontSize = 14.sp,
-//                            color = Color(0xFF4285F4)
-//                        )
-//                    }
-//
-//                    Spacer(modifier = Modifier.height(8.dp))
-//
-//                    Row(
-//                        verticalAlignment = Alignment.CenterVertically
-//                    ) {
-//                        Icon(
-//                            imageVector = Icons.Default.Phone,
-//                            contentDescription = "Phone",
-//                            tint = Color(0xFF4285F4),
-//                            modifier = Modifier.size(18.dp)
-//                        )
-//
-//                        Spacer(modifier = Modifier.width(8.dp))
-//
-//                        Text(
-//                            text = "+1 (555) 123-4567",
-//                            fontSize = 14.sp,
-//                            color = Color(0xFF4285F4)
-//                        )
-//                    }
-//                }
-//            }
-//
-//            Spacer(modifier = Modifier.height(32.dp))
-//
-//            // View Appointments Button
-//            Button(
-//                onClick = { navController.navigate("my_appointments") },
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(56.dp),
-//                shape = RoundedCornerShape(28.dp),
-//                colors = ButtonDefaults.buttonColors(
-//                    containerColor = Color(0xFF4285F4)
-//                )
-//            ) {
-//                Text("View My Appointments", fontSize = 16.sp)
-//            }
-//
-//            Spacer(modifier = Modifier.height(16.dp))
-//
-//            // Home Button
-//            Button(
-//                onClick = { navController.navigate("main") },
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(56.dp),
-//                shape = RoundedCornerShape(28.dp),
-//                colors = ButtonDefaults.buttonColors(
-//                    containerColor = Color.White
-//                ),
-//                elevation = ButtonDefaults.buttonElevation(
-//                    defaultElevation = 0.dp
-//                )
-//            ) {
-//                Text("Back to Home", fontSize = 16.sp, color = Color(0xFF4285F4))
-//            }
-//
-//            Spacer(modifier = Modifier.height(24.dp))
-//
-//            Text(
-//                text = "Best Regards,\nThe CureConnect Team",
-//                fontSize = 14.sp,
-//                color = Color.Gray,
-//                textAlign = TextAlign.Center
-//            )
-//
-//            Spacer(modifier = Modifier.height(24.dp))
-//        }
-//    }
-//}
-//
-//@Composable
-//fun DetailItem(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, value: String) {
-//    Row(
-//        verticalAlignment = Alignment.CenterVertically,
-//        modifier = Modifier.fillMaxWidth()
-//    ) {
-//        Icon(
-//            imageVector = icon,
-//            contentDescription = title,
-//            tint = Color(0xFF4285F4),
-//            modifier = Modifier.size(22.dp)
-//        )
-//
-//        Spacer(modifier = Modifier.width(12.dp))
-//
-//        Column {
-//            Text(
-//                text = title,
-//                fontSize = 14.sp,
-//                color = Color.Gray
-//            )
-//
-//            Text(
-//                text = value,
-//                fontSize = 16.sp,
-//                fontWeight = FontWeight.Medium,
-//                color = Color.Black
-//            )
-//        }
-//    }
-//}

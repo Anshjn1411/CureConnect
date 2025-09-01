@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
+
 @Composable
 fun healthcre(navController: NavController) {
     var searchQuery by remember { mutableStateOf("") }
@@ -59,35 +60,33 @@ fun healthcre(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8F9FA))
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)
     ) {
         // Header
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp, top =20.dp),
+                .padding(bottom = 16.dp, top = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "Health Tips",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Center
             )
             Text(
                 text = "For Your Wellbeing",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF2962FF),
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Discover simple yet effective tips to improve your health and wellness daily.",
-                fontSize = 14.sp,
-                color = Color.Gray,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
         }
@@ -101,15 +100,29 @@ fun healthcre(navController: NavController) {
                 filteredTips = filterTips(sampleHealthTips, it, selectedCategory)
                 isLoading = false
             },
-            placeholder = { Text("Search health tips...") },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
-            shape = RoundedCornerShape(12.dp),
+            placeholder = {
+                Text(
+                    "Search health tips...",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            leadingIcon = {
+                Icon(
+                    Icons.Default.Search,
+                    contentDescription = "Search",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            shape = MaterialTheme.shapes.medium,
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color.LightGray,
-                unfocusedBorderColor = Color.LightGray,
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White
+                focusedBorderColor = MaterialTheme.colorScheme.outline,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface
             ),
+            textStyle = MaterialTheme.typography.bodyMedium,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
@@ -135,15 +148,15 @@ fun healthcre(navController: NavController) {
         // Tips count
         Text(
             text = "Showing 1-${filteredTips.size} of ${sampleHealthTips.size} health tips",
-            fontSize = 12.sp,
-            color = Color.Gray,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
         // Health Tips Grid
         if (isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Color(0xFF2962FF))
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
         } else {
             LazyVerticalGrid(
@@ -164,35 +177,45 @@ fun healthcre(navController: NavController) {
 fun CategoryChip(category: String, isSelected: Boolean, onClick: () -> Unit) {
     val backgroundColor = when {
         isSelected -> when (category) {
-            "All" -> Color(0xFF2962FF)
-            "Daily Habits" -> Color(0xFF2962FF)
-            "Nutrition" -> Color(0xFFAB47BC)
-            "Fitness" -> Color(0xFF66BB6A)
-            "Rest" -> Color(0xFF7986CB)
-            "Mental Health" -> Color(0xFFF44336)
-            else -> Color(0xFF2962FF)
+            "All" -> MaterialTheme.colorScheme.primary
+            "Daily Habits" -> MaterialTheme.colorScheme.primary
+            "Nutrition" -> MaterialTheme.colorScheme.secondary
+            "Fitness" -> MaterialTheme.colorScheme.tertiary
+            "Rest" -> MaterialTheme.colorScheme.primaryContainer
+            "Mental Health" -> MaterialTheme.colorScheme.error
+            else -> MaterialTheme.colorScheme.primary
         }
-        else -> Color.White
+        else -> MaterialTheme.colorScheme.surface
     }
 
-    val textColor = if (isSelected) Color.White else Color.Black
+    val textColor = if (isSelected) {
+        when (category) {
+            "All", "Daily Habits" -> MaterialTheme.colorScheme.onPrimary
+            "Nutrition" -> MaterialTheme.colorScheme.onSecondary
+            "Fitness" -> MaterialTheme.colorScheme.onTertiary
+            "Rest" -> MaterialTheme.colorScheme.onPrimaryContainer
+            "Mental Health" -> MaterialTheme.colorScheme.onError
+            else -> MaterialTheme.colorScheme.onPrimary
+        }
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
 
     Surface(
-        shape = RoundedCornerShape(50),
+        shape = MaterialTheme.shapes.extraLarge,
         color = backgroundColor,
         modifier = Modifier
             .clickable { onClick() }
             .border(
                 width = if (isSelected) 0.dp else 1.dp,
-                color = Color.LightGray,
-                shape = RoundedCornerShape(50)
+                color = MaterialTheme.colorScheme.outline,
+                shape = MaterialTheme.shapes.extraLarge
             )
     ) {
         Text(
             text = category,
             color = textColor,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
+            style = MaterialTheme.typography.labelMedium,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
         )
     }
@@ -201,18 +224,31 @@ fun CategoryChip(category: String, isSelected: Boolean, onClick: () -> Unit) {
 @Composable
 fun HealthTipCard(tip: HealthTip) {
     val categoryColor = when (tip.category) {
-        "Daily Habits" -> Color(0xFF2962FF)
-        "Nutrition" -> Color(0xFFAB47BC)
-        "Fitness" -> Color(0xFF66BB6A)
-        "Rest" -> Color(0xFF7986CB)
-        "Mental Health" -> Color(0xFFF44336)
-        else -> Color(0xFFFFB300)
+        "Daily Habits" -> MaterialTheme.colorScheme.primary
+        "Nutrition" -> MaterialTheme.colorScheme.secondary
+        "Fitness" -> MaterialTheme.colorScheme.tertiary
+        "Rest" -> MaterialTheme.colorScheme.primaryContainer
+        "Mental Health" -> MaterialTheme.colorScheme.error
+        else -> MaterialTheme.colorScheme.primaryContainer
+    }
+
+    val onCategoryColor = when (tip.category) {
+        "Daily Habits" -> MaterialTheme.colorScheme.onPrimary
+        "Nutrition" -> MaterialTheme.colorScheme.onSecondary
+        "Fitness" -> MaterialTheme.colorScheme.onTertiary
+        "Rest" -> MaterialTheme.colorScheme.onPrimaryContainer
+        "Mental Health" -> MaterialTheme.colorScheme.onError
+        else -> MaterialTheme.colorScheme.onPrimaryContainer
     }
 
     Card(
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 4.dp
+        ),
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -227,31 +263,60 @@ fun HealthTipCard(tip: HealthTip) {
                 Box(
                     modifier = Modifier
                         .size(24.dp)
-                        .background(Color.White, CircleShape),
+                        .background(MaterialTheme.colorScheme.surface, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     // Category icon placeholder
                     when (tip.category) {
-                        "Daily Habits" -> Icon(Icons.Default.Favorite, contentDescription = null, tint = categoryColor, modifier = Modifier.size(16.dp))
-                        "Nutrition" -> Icon(Icons.Default.Favorite, contentDescription = null, tint = categoryColor, modifier = Modifier.size(16.dp))
-                        "Fitness" -> Icon(Icons.Default.Favorite, contentDescription = null, tint = categoryColor, modifier = Modifier.size(16.dp))
-                        "Rest" -> Icon(Icons.Default.Favorite, contentDescription = null, tint = categoryColor, modifier = Modifier.size(16.dp))
-                        "Mental Health" -> Icon(Icons.Default.Favorite, contentDescription = null, tint = categoryColor, modifier = Modifier.size(16.dp))
-                        else -> Icon(Icons.Default.Favorite, contentDescription = null, tint = categoryColor, modifier = Modifier.size(16.dp))
+                        "Daily Habits" -> Icon(
+                            Icons.Default.Favorite,
+                            contentDescription = null,
+                            tint = categoryColor,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        "Nutrition" -> Icon(
+                            Icons.Default.Favorite,
+                            contentDescription = null,
+                            tint = categoryColor,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        "Fitness" -> Icon(
+                            Icons.Default.Favorite,
+                            contentDescription = null,
+                            tint = categoryColor,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        "Rest" -> Icon(
+                            Icons.Default.Favorite,
+                            contentDescription = null,
+                            tint = categoryColor,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        "Mental Health" -> Icon(
+                            Icons.Default.Favorite,
+                            contentDescription = null,
+                            tint = categoryColor,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        else -> Icon(
+                            Icons.Default.Favorite,
+                            contentDescription = null,
+                            tint = categoryColor,
+                            modifier = Modifier.size(16.dp)
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = tip.category,
-                    color = Color.White,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium
+                    color = onCategoryColor,
+                    style = MaterialTheme.typography.labelMedium
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Icon(
                     imageVector = Icons.Default.Favorite,
                     contentDescription = "Favorite",
-                    tint = Color.White.copy(alpha = 0.6f),
+                    tint = onCategoryColor.copy(alpha = 0.6f),
                     modifier = Modifier.size(18.dp)
                 )
             }
@@ -264,17 +329,16 @@ fun HealthTipCard(tip: HealthTip) {
             ) {
                 Text(
                     text = tip.title,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = tip.description,
-                    fontSize = 14.sp,
-                    color = Color.DarkGray,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -286,9 +350,8 @@ fun HealthTipCard(tip: HealthTip) {
                 ) {
                     Text(
                         text = "Learn more",
-                        fontSize = 14.sp,
-                        color = categoryColor,
-                        fontWeight = FontWeight.Medium
+                        style = MaterialTheme.typography.labelMedium,
+                        color = categoryColor
                     )
                     Icon(
                         imageVector = Icons.Default.ArrowForward,
@@ -350,7 +413,6 @@ val sampleHealthTips = listOf(
         category = "Rest"
     )
 )
-
 
 fun filterTips(tips: List<HealthTip>, query: String, category: String): List<HealthTip> {
     return tips.filter {

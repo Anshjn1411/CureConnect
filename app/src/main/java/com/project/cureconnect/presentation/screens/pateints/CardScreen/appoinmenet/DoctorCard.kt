@@ -2,7 +2,6 @@ package com.project.cureconnect.presentation.screens.pateints.CardScreen.appoinm
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,17 +12,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,32 +26,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.project.cureconnect.R
-
 
 @Composable
 fun DoctorCard(doctor: Doctor, onDoctorClick: () -> Unit) {
     Card(
-
         onClick = onDoctorClick,
         modifier = Modifier
             .fillMaxWidth()
             .height(100.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0x00F5F7FA)
+            containerColor = MaterialTheme.colorScheme.surface
         ),
-        shape = RoundedCornerShape(8.dp),
+        shape = MaterialTheme.shapes.small,
         border = CardDefaults.outlinedCardBorder(true)
     ) {
         Row(
             modifier = Modifier
-                .padding(8.dp)
+                .padding(12.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -64,8 +54,8 @@ fun DoctorCard(doctor: Doctor, onDoctorClick: () -> Unit) {
             Box(
                 modifier = Modifier
                     .size(64.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color.White)
+                    .clip(MaterialTheme.shapes.small)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.doctor1),
@@ -83,33 +73,32 @@ fun DoctorCard(doctor: Doctor, onDoctorClick: () -> Unit) {
             ) {
                 Text(
                     text = doctor.name,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Text(
                     text = doctor.specialty,
-                    fontSize = 14.sp,
-                    color = Color.Gray,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 2.dp)
                 )
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 4.dp)
+                    modifier = Modifier.padding(top = 8.dp)
                 ) {
                     Card(
                         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = colorResource(R.color.primary_blue_light)
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
                         ),
-                        shape = RoundedCornerShape(8.dp),
+                        shape = MaterialTheme.shapes.small,
                         border = CardDefaults.outlinedCardBorder(true)
-
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(horizontal = 8.dp)
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Star,
@@ -120,28 +109,26 @@ fun DoctorCard(doctor: Doctor, onDoctorClick: () -> Unit) {
 
                             Text(
                                 text = doctor.rating.toString(),
-                                fontSize = 14.sp,
-                                color = Color.Black,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
                                 modifier = Modifier.padding(start = 4.dp)
                             )
                         }
-
                     }
-
 
                     Spacer(modifier = Modifier.width(12.dp))
 
                     Icon(
                         imageVector = Icons.Filled.LocationOn,
                         contentDescription = "Distance",
-                        tint = Color.Gray,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(14.dp)
                     )
 
                     Text(
                         text = "${doctor.distance} away",
-                        fontSize = 14.sp,
-                        color = Color.Gray,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(start = 4.dp)
                     )
                 }

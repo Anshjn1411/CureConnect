@@ -1,29 +1,31 @@
 [versions]
-agp = "8.8.2"
+agp = "8.8.0"
 kotlin = "2.0.0"
-coreKtx = "1.15.0"
-junit = "4.13.2"
-junitVersion = "1.2.1"
-espressoCore = "3.6.1"
-lifecycleRuntimeKtx = "2.8.7"
-activityCompose = "1.10.1"
-composeBom = "2025.03.00"
-databindingCompilerCommon = "8.9.0"
-firebaseFirestoreKtx = "25.1.2"
-googleGmsGoogleServices = "4.4.2"
-firebaseFirestore = "25.1.2"
-material= "1.12.0"
-playServicesNearby = "18.1.0"
-zegoUnikit="3.7.3"
-appcompat = "1.7.0"
-volley = "1.2.1"
+coreKtx = "1.16.0"
 
+junit = "4.13.2"
+junitVersion = "1.1.5"
+espressoCore = "3.5.1"
+lifecycleRuntimeKtx = "2.6.2"
+activityCompose = "1.8.2"
+composeBom = "2024.03.00"
+databindingCompilerCommon = "8.2.0"
+firebaseFirestoreKtx = "24.10.3"
+googleGmsGoogleServices = "4.4.0"
+firebaseFirestore = "24.10.3"
+material = "1.9.0"
+playServicesNearby = "18.3.1"
+zegoUnikit = "3.7.3"
+appcompat = "1.6.1"
+volley = "1.2.1"
+playServicesLocation = "21.0.1"
+uiToolingPreview = "1.8.3"
+uiTooling = "1.8.3"
 
 [libraries]
-
 play-services-nearby = { module = "com.google.android.gms:play-services-nearby", version.ref = "playServicesNearby" }
-androidx-appcompat = { group = "androidx.appcompat", name = "android.appcompat:appcompat", version.ref = "appcompat" }
-zego_uikit_call ={module = "com.github.ZEGOCLOUD:zego_uikit_prebuilt_call_android"}
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+zego_uikit_call = { module = "com.github.ZEGOCLOUD:zego_uikit_prebuilt_call_android", version.ref = "zegoUnikit" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -41,13 +43,14 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 androidx-databinding-compiler-common = { group = "androidx.databinding", name = "databinding-compiler-common", version.ref = "databindingCompilerCommon" }
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
-material = {group ="com.google.android.material" , name = "material" , version.ref ="material"}
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 volley = { group = "com.android.volley", name = "volley", version.ref = "volley" }
-
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref = "uiToolingPreview" }
+ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "uiTooling" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
-

@@ -1,4 +1,5 @@
 package com.project.cureconnect.presentation.screens.pateints.ProfileScreen
+
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,6 +21,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,7 +42,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.project.cureconnect.R
-
 import com.project.cureconnect.data.datastore.UserSessionLayer.CachedUser
 import com.project.cureconnect.data.datastore.UserSessionLayer.UserSessionManager
 import com.project.cureconnect.presentation.navigationRoutes.Screen
@@ -48,7 +49,6 @@ import com.project.cureconnect.presentation.screens.pateints.MainScreen.MainBott
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
 
 @Composable
 fun ProfileScreen(
@@ -73,12 +73,13 @@ fun ProfileScreen(
         }
     }
 
-
     Scaffold(
-        bottomBar = { MainBottomBar(navController = navController , selectedItem = selectedItem){index->
-            selectedItem =index
-
-        } }
+        bottomBar = {
+            MainBottomBar(navController = navController, selectedItem = selectedItem) { index ->
+                selectedItem = index
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -93,11 +94,11 @@ fun ProfileScreen(
                     .padding(vertical = 16.dp)
                     .size(100.dp)
                     .clip(CircleShape)
-                    .background(Color.LightGray),
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.user_logo),
+                    painter = painterResource(id = R.drawable.baseline_person_24),
                     contentDescription = "Profile Image",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
@@ -106,8 +107,10 @@ fun ProfileScreen(
 
             Text(
                 text = cachedUser?.name ?: "Loading...",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
@@ -120,32 +123,32 @@ fun ProfileScreen(
                     icon = R.drawable.ic_heart,
                     value = "215bpm",
                     label = "Heart rate",
-                    tint = Color(0xFF4285F4)
+                    tint = MaterialTheme.colorScheme.primary
                 )
 
                 HealthMetric(
                     icon = R.drawable.cureconnect_logo,
                     value = "756cal",
                     label = "Calories",
-                    tint = Color(0xFF4285F4)
+                    tint = MaterialTheme.colorScheme.primary
                 )
 
                 HealthMetric(
                     icon = R.drawable.cureconnect_logo,
                     value = "103lbs",
                     label = "Weight",
-                    tint = Color(0xFF4285F4)
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
+
             LazyColumn {
                 item {
                     ProfileMenuItem(
                         icon = R.drawable.cureconnect_logo,
                         title = "History",
-                        onClick = { navController.navigate("history")
-                             }
+                        onClick = { navController.navigate("history") }
                     )
                 }
                 item {
@@ -154,7 +157,6 @@ fun ProfileScreen(
                         title = "Appointment",
                         onClick = { navController.navigate(Screen.Appointment.routes) }
                     )
-
                 }
                 item {
                     ProfileMenuItem(
@@ -162,7 +164,6 @@ fun ProfileScreen(
                         title = "Payment Method",
                         onClick = { /* Navigate to payment methods */ }
                     )
-
                 }
                 item {
                     ProfileMenuItem(
@@ -170,7 +171,6 @@ fun ProfileScreen(
                         title = "FAQs",
                         onClick = { /* Navigate to FAQs */ }
                     )
-
                 }
                 item {
                     ProfileMenuItem(
@@ -180,24 +180,14 @@ fun ProfileScreen(
                             CoroutineScope(Dispatchers.IO).launch {
                                 sessionManager.clearUser()
                             }
-                                navController.navigate(Screen.WelcomeScreen1.routes){
-                                    popUpTo(0) { inclusive = true }
-                                    launchSingleTop = true
-                                }
-
-
+                            navController.navigate(Screen.WelcomeScreen1.routes) {
+                                popUpTo(0) { inclusive = true }
+                                launchSingleTop = true
+                            }
                         }
                     )
                 }
             }
-
-            // Menu items
-
-
-
-
-
-
         }
     }
 }
@@ -229,15 +219,17 @@ fun HealthMetric(
 
         Text(
             text = value,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.Bold
+            ),
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(top = 4.dp)
         )
 
         Text(
             text = label,
-            fontSize = 12.sp,
-            color = Color.Gray
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -252,8 +244,11 @@ fun ProfileMenuItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        shape = RoundedCornerShape(12.dp),
+        shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
         onClick = onClick
     ) {
         Row(
@@ -266,20 +261,21 @@ fun ProfileMenuItem(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFEEF1F4)),
+                    .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     painter = painterResource(id = icon),
                     contentDescription = title,
-                    tint = Color(0xFF4285F4),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(20.dp)
                 )
             }
 
             Text(
                 text = title,
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
                     .weight(1f)
                     .padding(start = 16.dp)
@@ -288,7 +284,7 @@ fun ProfileMenuItem(
             Icon(
                 imageVector = Icons.Default.KeyboardArrowRight,
                 contentDescription = "More",
-                tint = Color.Gray
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

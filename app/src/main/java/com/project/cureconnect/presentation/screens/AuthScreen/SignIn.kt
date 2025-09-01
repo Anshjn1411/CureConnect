@@ -54,56 +54,38 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.project.cureconnect.R
 
 import com.project.cureconnect.data.datastore.UserSessionLayer.UserSessionManager
 import com.project.cureconnect.presentation.navigationRoutes.Screen
+import com.project.cureconnect.ui.theme.CureConnectTheme
+import com.project.ecommerceLocal.utils.Apputils
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(navController: NavController ,
+               authViewModel: AuthViewModel
+) {
+
     val context = LocalContext.current
-    val sessionManager = remember { UserSessionManager(context) }
     var selectedRole by remember { mutableStateOf("Patient") }
-
-    val authViewModel: AuthViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return AuthViewModel(sessionManager) as T
-            }
-        }
-    )
-
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-
     val loading by authViewModel.loading
-    val loginSuccess by authViewModel.successLogin
     val loginMessage by authViewModel.loginMessage
     val keyboardController = LocalSoftwareKeyboardController.current
-
-    LaunchedEffect(loginSuccess) {
-        if (loginSuccess) {
-            if(selectedRole=="Patient"){
-                navController.navigate(Screen.MainDashBoard.routes) {
-                    popUpTo(Screen.Login.routes) { inclusive = true }
-                }
-            }else{
-                navController.navigate(Screen.DoctorDashborad.routes) {
-                    popUpTo(Screen.Login.routes) { inclusive = true }
-                }
-            }
-        }
-    }
+    val isDoctor = selectedRole == "Doctor"
 
     loginMessage?.let {
-        ShowToast(message = it)
+        Apputils.showToast(context, message = it)
     }
 
     Box(
@@ -305,22 +287,31 @@ fun LoginScreen(navController: NavController) {
                 Spacer(modifier = Modifier.height(32.dp))
 
                 // Sign In Button
+
                 Button(
                     onClick = {
                         keyboardController?.hide()
-                        val isDoctor = selectedRole == "Doctor"
-                        authViewModel.login(email, password, isDoctor = isDoctor) {
+                        authViewModel.login(email.trim(), password, isDoctor = isDoctor) {
+                            if (selectedRole == "Patient") {
+                                navController.navigate(Screen.MainDashBoard.routes) {
+                                    popUpTo(Screen.Login.routes) { inclusive = true }
+                                }
+                            } else {
+                                navController.navigate(Screen.DoctorDashborad.routes) {
+                                    popUpTo(Screen.Login.routes) { inclusive = true }
+                                }
+                            }
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
+                    enabled = !loading && email.isNotBlank() && password.isNotBlank(),
                     shape = MaterialTheme.shapes.medium,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary,
                         disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                         disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    ),
-                    enabled = !loading && email.isNotBlank() && password.isNotBlank()
+                    )
                 ) {
                     if (loading) {
                         CircularProgressIndicator(
@@ -336,6 +327,7 @@ fun LoginScreen(navController: NavController) {
                         fontWeight = FontWeight.SemiBold
                     )
                 }
+
 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -427,7 +419,7 @@ fun LoginScreen(navController: NavController) {
                     )
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.facebook_logo), // Add your Facebook icon
+                        painter = painterResource(id = R.drawable.facebook_logo),
                         contentDescription = "Facebook",
                         modifier = Modifier.size(20.dp),
                         tint = Color.Unspecified
@@ -446,14 +438,8 @@ fun LoginScreen(navController: NavController) {
     }
 }
 
-@Composable
-fun ShowToast(message: String) {
-    val context = LocalContext.current
 
-    LaunchedEffect(message) {
-        if (message.isNotBlank()) {
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-        }
-    }
-}
+
+
+
 

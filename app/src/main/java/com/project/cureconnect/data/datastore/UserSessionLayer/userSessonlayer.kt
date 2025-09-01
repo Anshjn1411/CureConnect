@@ -1,6 +1,7 @@
 package com.project.cureconnect.data.datastore.UserSessionLayer
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import com.project.cureconnect.presentation.screens.AuthScreen.User
@@ -31,6 +32,7 @@ class UserSessionManager(private val context: Context) {
 
     companion object {
         private val USER_JSON = stringPreferencesKey("user_json")
+        private val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
     }
 
     val userData: Flow<CachedUser?> = context.dataStore.data.map { preferences ->
@@ -43,7 +45,12 @@ class UserSessionManager(private val context: Context) {
         }
     }
 
-    suspend fun saveUser(user: User) {
+    val isLoggedInFlow: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[IS_LOGGED_IN] ?: false
+    }
+
+    suspend fun saveUser(user: User ) {
+        Log.d("UserSessionManager", "Saving user: $user")
         val cached = CachedUser(
             uid = user.uid,
             name = user.name,
@@ -52,25 +59,37 @@ class UserSessionManager(private val context: Context) {
             role = user.role
         )
         val json = Json.encodeToString(cached)
-        context.dataStore.edit { it[USER_JSON] = json }
+        context.dataStore.edit {
+            it[USER_JSON] = json
+            it[IS_LOGGED_IN] = true
+        }
     }
+
     suspend fun saveDoctor(user: Doctor) {
         val cached = CachedUser(
             uid = user.uid,
             name = user.name,
             email = user.email,
             phone = user.phoneNumber,
-            role= user.role
-
+            role = user.role
         )
         val json = Json.encodeToString(cached)
-        context.dataStore.edit { it[USER_JSON] = json }
+        context.dataStore.edit {
+            it[USER_JSON] = json
+            it[IS_LOGGED_IN] = true
+        }
     }
 
+
     suspend fun clearUser() {
-        context.dataStore.edit { it.clear() }
+        context.dataStore.edit {
+            it.clear()
+        }
     }
+
     suspend fun clearDoctor() {
-        context.dataStore.edit { it.clear() }
+        context.dataStore.edit {
+            it.clear()
+        }
     }
 }

@@ -19,9 +19,8 @@ dependencyResolutionManagement {
             url = uri("https://github.com/jitsi/jitsi-maven-repository/raw/master/releases")
         }
         google()
-        mavenCentral()
-        maven (  "https://storage.zego.im/maven" )   // <- Add this line.
         maven (  "https://www.jitpack.io" )
+        mavenCentral()
     }
 }
 

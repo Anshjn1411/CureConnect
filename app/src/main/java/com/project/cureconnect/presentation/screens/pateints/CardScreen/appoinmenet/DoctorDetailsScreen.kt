@@ -19,8 +19,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -33,6 +34,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -51,93 +53,64 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.google.firebase.firestore.FirebaseFirestore
 import com.project.cureconnect.R
 import com.project.cureconnect.data.datastore.UserSessionLayer.CachedUser
 import com.project.cureconnect.data.datastore.UserSessionLayer.UserSessionManager
-import com.project.cureconnect.presentation.screens.pateints.HistoryPage.PatientHistoryRecord
 
-
+import com.project.cureconnect.ui.theme.CureConnectTheme
+import java.time.LocalDate
+import java.time.format.TextStyle
+import java.util.Locale
 import java.util.UUID
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DoctorDetailsScreen(doctor: Doctor, navController: NavController, viewModel: AppoinmenetViewModel = viewModel()) {
+fun DoctorDetailsScreen(
+    doctor: Doctor,
+    navController: NavController,
+    viewModel: AppoinmenetViewModel
+) {
     val scrollState = rememberScrollState()
-    var selectedDate by remember { mutableStateOf("23") }
-    var selectedDay by remember { mutableStateOf("Wed") }
-    var selectedTime by remember { mutableStateOf("02:00 PM") }
+    var selectedDay by remember { mutableStateOf(LocalDate.now().dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())) }
+    var selectedDate by remember { mutableStateOf(LocalDate.now().dayOfMonth.toString()) }
+    var selectedTime by remember { mutableStateOf("") }
+
     var name by remember { mutableStateOf("") }
     val context = LocalContext.current
     val activity = context as ComponentActivity
     var appointments by remember { mutableStateOf<Appointment?>(null) }
-    val sessionManager = remember { UserSessionManager(context) }
-    var historyRecords by remember { mutableStateOf<List<PatientHistoryRecord>>(emptyList()) }
-    var cachedUser by remember { mutableStateOf<CachedUser?>(null) }
+    val sessionManager= UserSessionManager(context)
 
-// Observe cached user from DataStore
+    val user by viewModel.userData.collectAsState()
+    val history by viewModel.history.collectAsState()
+
     LaunchedEffect(Unit) {
-        sessionManager.userData.collect { user ->
-            cachedUser = user
-        }
+        viewModel.loadUserAndHistory(sessionManager)
     }
 
-// Fetch history when cachedUser is available
-    LaunchedEffect(cachedUser) {
-        cachedUser?.name?.let { userName ->
-            val db = FirebaseFirestore.getInstance()
-            db.collection("patients")
-                .document(userName)
-                .collection("history")
-                .get()
-                .addOnSuccessListener { documents ->
-                    historyRecords = documents.map { document ->
-                        PatientHistoryRecord(
-                            recordId = document.id,
-                            imageUrl = document.getString("imageUrl") ?: "",
-                            response = document.getString("response") ?: "No response available"
-                        )
-                    }
-                    Log.d("Firestore", "Fetched ${historyRecords.size} history records")
-                }
-                .addOnFailureListener { exception ->
-                    Log.e("Firestore", "Error fetching history", exception)
-                }
-        }
-    }
-
-    Log.d("checker ", "checking")
 
     val paymentViewModel: PaymentViewModel = viewModel()
     val paymentStatus by paymentViewModel.paymentStatus.collectAsState()
-// In your effect or side-effect handler
+
     LaunchedEffect(paymentStatus) {
         when (val status = paymentStatus) {
             is PaymentStatus.Success -> {
-                Log.d("aaaaaaaa", "khwgdbkdbdb")
-                // Show success toast
                 Toast.makeText(context, "Payment Successful!", Toast.LENGTH_SHORT).show()
-
-                // Navigate to confirmation screen
                 navController.navigate("appointment_confirmation/${doctor.uid}") {
                     popUpTo("book_appointment") { inclusive = true }
                 }
-
             }
             is PaymentStatus.Failed -> {
-                // Show error toast or dialog
                 Toast.makeText(context, "Payment Failed: ${status.errorMessage}", Toast.LENGTH_SHORT).show()
             }
             PaymentStatus.Initial -> {
-                // Initial state, do nothing
             }
-
             else -> {}
         }
     }
@@ -145,18 +118,28 @@ fun DoctorDetailsScreen(doctor: Doctor, navController: NavController, viewModel:
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Doctor Detail", fontSize = 18.sp, fontWeight = FontWeight.Medium) },
+                title = {
+                    Text(
+                        text = "Doctor Detail",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = "Back",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             )
         },
-        containerColor = Color.White
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -169,10 +152,11 @@ fun DoctorDetailsScreen(doctor: Doctor, navController: NavController, viewModel:
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color.White
-                )
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                shape = MaterialTheme.shapes.medium
             ) {
                 Row(
                     modifier = Modifier
@@ -184,11 +168,11 @@ fun DoctorDetailsScreen(doctor: Doctor, navController: NavController, viewModel:
                     Box(
                         modifier = Modifier
                             .size(72.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(Color(0xFFF5F7FA))
+                            .clip(MaterialTheme.shapes.small)
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
                     ) {
                         Image(
-                            painter = painterResource( id = R.drawable.doctor1),
+                            painter = painterResource(id = R.drawable.doctor1),
                             contentDescription = "Doctor Image",
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
@@ -203,14 +187,14 @@ fun DoctorDetailsScreen(doctor: Doctor, navController: NavController, viewModel:
                     ) {
                         Text(
                             text = doctor.name,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
 
                         Text(
                             text = doctor.specialty,
-                            fontSize = 14.sp,
-                            color = Color.Gray,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(top = 2.dp)
                         )
 
@@ -227,8 +211,8 @@ fun DoctorDetailsScreen(doctor: Doctor, navController: NavController, viewModel:
 
                             Text(
                                 text = "4.7",
-                                fontSize = 14.sp,
-                                color = Color.Gray,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(start = 4.dp)
                             )
 
@@ -237,14 +221,14 @@ fun DoctorDetailsScreen(doctor: Doctor, navController: NavController, viewModel:
                             Icon(
                                 imageVector = Icons.Filled.LocationOn,
                                 contentDescription = "Distance",
-                                tint = Color.Gray,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(14.dp)
                             )
 
                             Text(
                                 text = "800m away",
-                                fontSize = 14.sp,
-                                color = Color.Gray,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(start = 4.dp)
                             )
                         }
@@ -260,119 +244,47 @@ fun DoctorDetailsScreen(doctor: Doctor, navController: NavController, viewModel:
             ) {
                 Text(
                     text = "About",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color.Black
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
 
                 Text(
-                    text = "Lorem ipsum dolor sit amet, consectetur adipi elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam...",
-                    fontSize = 14.sp,
-                    color = Color.Gray,
+                    text = doctor.bio,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 8.dp)
                 )
 
-                Text(
-                    text = "Read more",
-                    fontSize = 14.sp,
-                    color = Color(0xFF4285F4),
-                    modifier = Modifier.padding(top = 4.dp).clickable{}
-
-                )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            // UI oF THE TIME SLOT ___ WITH Realtime Dates and Availbel Times of Doctor
+            AvailableDateAndTimeSection(
+                doctor = doctor,
+                selectedDay = selectedDay,
+                selectedDate = selectedDate,
+                onDateSelected = { day, date ->
+                    selectedDay = day
+                    selectedDate = date
+                },
+                selectedTime = selectedTime,
+                onTimeSelected = { time -> selectedTime = time }
+            )
 
-            // Calendar Week View
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                DayItem("Mon", "21", selectedDay == "Mon" && selectedDate == "21") {
-                    selectedDay = "Mon"
-                    selectedDate = "21"
-                }
-                DayItem("Tue", "22", selectedDay == "Tue" && selectedDate == "22") {
-                    selectedDay = "Tue"
-                    selectedDate = "22"
-                }
-                DayItem("Wed", "23", selectedDay == "Wed" && selectedDate == "23") {
-                    selectedDay = "Wed"
-                    selectedDate = "23"
-                }
-                DayItem("Thu", "24", selectedDay == "Thu" && selectedDate == "24") {
-                    selectedDay = "Thu"
-                    selectedDate = "24"
-                }
-                DayItem("Fri", "25", selectedDay == "Fri" && selectedDate == "25") {
-                    selectedDay = "Fri"
-                    selectedDate = "25"
-                }
-                DayItem("Sat", "26", selectedDay == "Sat" && selectedDate == "26") {
-                    selectedDay = "Sat"
-                    selectedDate = "26"
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Time Slots - Row 1
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                TimeSlot("09:00 AM", selectedTime == "09:00 AM" , doctor) { selectedTime = "09:00 AM" }
-                TimeSlot("10:00 AM", selectedTime == "10:00 AM" , doctor) { selectedTime = "10:00 AM" }
-                TimeSlot("11:00 AM", selectedTime == "11:00 AM" , doctor) { selectedTime = "11:00 AM" }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Time Slots - Row 2
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                TimeSlot("01:00 PM", selectedTime == "01:00 PM" , doctor) { selectedTime = "01:00 PM" }
-                TimeSlot("02:00 PM", selectedTime == "02:00 PM", doctor) { selectedTime = "02:00 PM" }
-                TimeSlot("03:00 PM", selectedTime == "03:00 PM" , doctor) { selectedTime = "03:00 PM" }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Time Slots - Row 3
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                TimeSlot("04:00 PM", selectedTime == "04:00 PM" , doctor) { selectedTime = "04:00 PM" }
-                TimeSlot("07:00 PM", selectedTime == "07:00 PM" , doctor) { selectedTime = "07:00 PM" }
-                TimeSlot("08:00 PM", selectedTime == "08:00 PM", doctor) { selectedTime = "08:00 PM" }
-            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             // Book Appointment Button
             Button(
-
                 onClick = {
                     val appointment = Appointment(
                         id = UUID.randomUUID().toString(),
-                        patientId = cachedUser?.uid.toString(),
+                        patientId = user?.uid.toString(),
                         doctorId = doctor.uid,
                         doctorname = doctor.name,
                         date = "$selectedDay $selectedDate",
                         time = selectedTime,
                         status = "Pending Payment",
-                        patientHistoryRecord = historyRecords
+                        patientHistoryRecord = history
                     )
 
                     paymentViewModel.initiatePayment(
@@ -381,25 +293,93 @@ fun DoctorDetailsScreen(doctor: Doctor, navController: NavController, viewModel:
                         doctor,
                     )
 
-                    viewModel.successfullBooking(cachedUser?.email, appointment, doctor,name)
+                    viewModel.successfullBooking(user?.email, appointment, doctor, name)
                     bookAppointment(appointment)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
                     .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(28.dp),
+                shape = MaterialTheme.shapes.large,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF4285F4)
+                    containerColor = MaterialTheme.colorScheme.primary
                 )
             ) {
-                Text("Book Appointment", fontSize = 16.sp)
+                Text(
+                    text = "Book Appointment",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
             }
-        }
 
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
+}
+
+
+@Composable
+fun AvailableDateAndTimeSection(
+    doctor: Doctor,
+    selectedDay: String,
+    selectedDate: String,
+    onDateSelected: (String, String) -> Unit,
+    selectedTime: String,
+    onTimeSelected: (String) -> Unit
+) {
+    val days = remember {
+        val today = LocalDate.now()
+        (0..4).map { offset ->
+            val date = today.plusDays(offset.toLong())
+            Pair(date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()), date.dayOfMonth.toString())
+        }
+    }
+
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+
+        // 📅 Days Row
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+        ) {
+            items(days) { (day, date) ->
+                DayItem(
+                    day = day,
+                    date = date,
+                    isSelected = selectedDate == date,
+                    onClick = { onDateSelected(day, date) }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // 🕒 Time Slots Grid
+        val chunkedTimes = doctor.availableTimes.chunked(3)
+
+        chunkedTimes.forEach { rowTimes ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                rowTimes.forEach { time ->
+                    TimeSlot(
+                        time = time,
+                        isSelected = selectedTime == time,
+                        doctor = doctor,
+                        onClick = { onTimeSelected(time) }
+                    )
+                }
+
+                repeat(3 - rowTimes.size) {
+                    Spacer(modifier = Modifier.width(110.dp))
+                }
+            }
+        }
+    }
+}
 
 
 @Composable
@@ -408,8 +388,11 @@ fun DayItem(day: String, date: String, isSelected: Boolean, onClick: () -> Unit)
         modifier = Modifier
             .width(40.dp)
             .height(80.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(if (isSelected) Color(0xFF4285F4) else Color(0xFFF5F7FA))
+            .clip(MaterialTheme.shapes.small)
+            .background(
+                if (isSelected) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.surfaceVariant
+            )
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
@@ -418,14 +401,15 @@ fun DayItem(day: String, date: String, isSelected: Boolean, onClick: () -> Unit)
         ) {
             Text(
                 text = day,
-                fontSize = 14.sp,
-                color = if (isSelected) Color.White else Color.Gray
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                else MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
                 text = date,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = if (isSelected) Color.White else Color.Black
+                style = MaterialTheme.typography.headlineSmall,
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                else MaterialTheme.colorScheme.onSurface
             )
         }
     }
@@ -433,130 +417,39 @@ fun DayItem(day: String, date: String, isSelected: Boolean, onClick: () -> Unit)
 
 @Composable
 fun TimeSlot(time: String, isSelected: Boolean, doctor: Doctor, onClick: () -> Unit) {
+    val isAvailable = doctor.availableTimes.contains(time)
+
     Box(
         modifier = Modifier
             .width(110.dp)
             .height(40.dp)
-            .clip(RoundedCornerShape(20.dp))
+            .clip(MaterialTheme.shapes.large)
             .background(
-                if (isSelected && doctor.availableTimes.contains(time)) Color(0xFF4285F4)
-                else if(doctor.availableTimes.contains(time)) Color(0xFFF5F7FA)
-                else Color(0xFF64B9F8)
+                when {
+                    isSelected && isAvailable -> MaterialTheme.colorScheme.primary
+                    isAvailable -> MaterialTheme.colorScheme.surfaceVariant
+                    else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                }
             )
             .border(
                 width = 1.dp,
-                color = if (isSelected) Color(0xFF4285F4) else Color(0xFFE0E0E0),
-                shape = RoundedCornerShape(20.dp)
+                color = if (isSelected) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.outline,
+                shape = MaterialTheme.shapes.large
             )
-            .clickable(onClick = onClick),
+            .clickable(enabled = isAvailable, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = time,
-            fontSize = 14.sp,
-            color = if (isSelected) Color.White else Color.Gray
-        )
-    }
-}
-
-
-
-
-/**
- * Sealed class representing different states of the payment process
- */
-sealed class PaymentState {
-    /**
-     * Represents the initial state before any payment action
-     */
-    object Idle : PaymentState()
-
-    /**
-     * Represents a successful payment and appointment booking
-     * @property appointment The successfully booked appointment details
-     */
-    data class Success(val appointment: Appointment) : PaymentState()
-
-    /**
-     * Represents an error during the payment or booking process
-     * @property message Detailed error message describing the failure
-     */
-    data class Error(val message: String) : PaymentState()
-
-    /**
-     * Represents the ongoing payment processing state
-     */
-    object Processing : PaymentState()
-
-    /**
-     * Represents a pending payment state
-     * @property transactionId Unique identifier for the pending transaction
-     */
-    data class Pending(val transactionId: String) : PaymentState()
-
-    /**
-     * Represents a payment cancellation state
-     */
-    object Cancelled : PaymentState()
-
-    /**
-     * Checks if the current state represents a successful payment
-     */
-    val isSuccess: Boolean
-        get() = this is Success
-
-    /**
-     * Checks if the current state represents an error
-     */
-    val isError: Boolean
-        get() = this is Error
-
-    /**
-     * Checks if the current state is processing
-     */
-    val isProcessing: Boolean
-        get() = this == Processing
-
-    /**
-     * Provides a user-friendly message based on the current state
-     */
-    fun getUserMessage(): String = when (this) {
-        is Idle -> "Payment not initiated"
-        is Success -> "Payment successful for appointment ${appointment.id}"
-        is Error -> message
-        is Processing -> "Processing payment..."
-        is Pending -> "Payment pending for transaction $transactionId"
-        is Cancelled -> "Payment was cancelled"
-    }
-}
-
-/**
- * Companion object to provide additional utility methods for PaymentState
- */
-object PaymentStateUtils {
-    /**
-     * Create a specific error state with predefined error types
-     */
-    fun createErrorState(type: ErrorType, customMessage: String? = null): PaymentState.Error {
-        return PaymentState.Error(
-            customMessage ?: when (type) {
-                ErrorType.NETWORK_ERROR -> "Network connection failed"
-                ErrorType.PAYMENT_FAILED -> "Payment transaction failed"
-                ErrorType.INSUFFICIENT_FUNDS -> "Insufficient funds"
-                ErrorType.INVALID_DETAILS -> "Invalid payment details"
-                ErrorType.BANK_RESTRICTION -> "Bank transaction restricted"
+            style = MaterialTheme.typography.bodyMedium,
+            color = when {
+                isSelected -> MaterialTheme.colorScheme.onPrimary
+                isAvailable -> MaterialTheme.colorScheme.onSurfaceVariant
+                else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
             }
         )
     }
 }
 
-/**
- * Enum representing different types of payment errors
- */
-enum class ErrorType {
-    NETWORK_ERROR,
-    PAYMENT_FAILED,
-    INSUFFICIENT_FUNDS,
-    INVALID_DETAILS,
-    BANK_RESTRICTION
-}
+

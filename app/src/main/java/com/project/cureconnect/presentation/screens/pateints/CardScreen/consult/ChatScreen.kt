@@ -12,6 +12,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -46,30 +48,34 @@ fun ChatScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF6F6F6))
+            .background(MaterialTheme.colorScheme.background)
     ) {
 
         // Top bar
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.White)
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            shadowElevation = 4.dp
         ) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Back",
+            Row(
                 modifier = Modifier
-                    .clickable { navController.popBackStack() }
-                    .padding(end = 16.dp),
-                tint = Color.Black
-            )
-            Text(
-                text = "Chat with Doctor",
-                color = Color.Black,
-                fontSize = 20.sp
-            )
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    modifier = Modifier
+                        .clickable { navController.popBackStack() }
+                        .padding(end = 16.dp),
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "Chat with Doctor",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
         }
 
         // Chat messages list
@@ -86,64 +92,94 @@ fun ChatScreen(
         }
 
         // Input field
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            shadowElevation = 8.dp
         ) {
-            androidx.compose.foundation.text.BasicTextField(
-                value = inputMessage,
-                onValueChange = { inputMessage = it },
+            Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .background(Color.White, RoundedCornerShape(20.dp))
-                    .padding(horizontal = 16.dp, vertical = 10.dp),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Send),
-                keyboardActions = KeyboardActions(
-                    onSend = {
-                        if (inputMessage.isNotBlank()) {
-                            viewModel.sendMessage(doctorId, userId, inputMessage)
-                            inputMessage = ""
-                            focusManager.clearFocus()
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    modifier = Modifier.weight(1f),
+                    shape = MaterialTheme.shapes.large,
+                    color = MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    androidx.compose.foundation.text.BasicTextField(
+                        value = inputMessage,
+                        onValueChange = { inputMessage = it },
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.bodyMedium.copy(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        ),
+                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Send),
+                        keyboardActions = KeyboardActions(
+                            onSend = {
+                                if (inputMessage.isNotBlank()) {
+                                    viewModel.sendMessage(doctorId, userId, inputMessage)
+                                    inputMessage = ""
+                                    focusManager.clearFocus()
+                                }
+                            }
+                        ),
+                        decorationBox = { innerTextField ->
+                            if (inputMessage.isBlank()) {
+                                Text(
+                                    "Type message...",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                            innerTextField()
                         }
-                    }
-                ),
-                decorationBox = { innerTextField ->
-                    if (inputMessage.isBlank()) {
-                        Text("Type message...", color = Color.Gray, fontSize = 14.sp)
-                    }
-                    innerTextField()
+                    )
                 }
-            )
 
-            Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(8.dp))
 
-            Icon(
-                imageVector = Icons.Default.Send,
-                contentDescription = "Send",
-                tint = PrimaryBlueLight,
-                modifier = Modifier
-                    .size(28.dp)
-                    .clickable {
+                Surface(
+                    shape = MaterialTheme.shapes.small,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable {
                         if (inputMessage.isNotBlank()) {
                             viewModel.sendMessage(doctorId, userId, inputMessage)
                             inputMessage = ""
                             focusManager.clearFocus()
                         }
                     }
-            )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Send,
+                        contentDescription = "Send",
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .size(24.dp)
+                    )
+                }
+            }
         }
     }
 }
 
-
 @Composable
 fun ChatBubble(message: String, isUser: Boolean) {
-    val bubbleColor = if (isUser) PrimaryBlue else Color(0xFFE0E0E0)
-    val textColor = if (isUser) Color.White else Color.Black
-    val alignment = if (isUser) Alignment.End else Alignment.Start
+    val bubbleColor = if (isUser) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.surfaceVariant
+    }
+
+    val textColor = if (isUser) {
+        MaterialTheme.colorScheme.onPrimary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
     val horizontalPadding = if (isUser) 64.dp else 8.dp
 
     Row(
@@ -152,15 +188,16 @@ fun ChatBubble(message: String, isUser: Boolean) {
             .padding(horizontal = horizontalPadding),
         horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
     ) {
-        Box(
-            modifier = Modifier
-                .background(color = bubbleColor, shape = RoundedCornerShape(16.dp))
-                .padding(horizontal = 14.dp, vertical = 8.dp)
+        Surface(
+            color = bubbleColor,
+            shape = MaterialTheme.shapes.medium,
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
         ) {
             Text(
                 text = message,
                 color = textColor,
-                fontSize = 14.sp
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
             )
         }
     }

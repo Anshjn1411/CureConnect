@@ -9,11 +9,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 
 import androidx.navigation.compose.rememberNavController
-import com.project.cureconnect.presentation.screens.DoctorPanel.MainDashBorad.DoctorAppointmentsScreen
+import com.project.cureconnect.DoctorPanel.MainDashBorad.ProfileScreen
+import com.project.cureconnect.patients.cardScreens.telemedicines.telemedicineScreen
+import com.project.cureconnect.presentation.navigationRoutes.AppHost
 import com.project.cureconnect.presentation.screens.DoctorPanel.MainDashBorad.DoctorDashBoard
-
-import com.project.cureconnect.presentation.screens.DoctorPanel.cardScreen.telemedicines
-
+import com.project.cureconnect.presentation.screens.pateints.chatbot.HealthChatBotScreen
 
 
 @RequiresApi(Build.VERSION_CODES.S)
@@ -28,18 +28,21 @@ fun Navigation(
             DoctorDashBoard(navController)
         }
 
-        composable("doctor_appoinmenet/{doctorId}") { backStackEntry ->
-            val doctorId = backStackEntry.arguments?.getString("doctorId")
-            doctorId?.let {
-                    DoctorAppointmentsScreen(navController,doctorId)
-            }
-        }
         composable(Screen.Telemedicine.routes){
-            telemedicines(navController)
+            telemedicineScreen(navController)
+        }
+        composable(Screen.profile.routes){
+            ProfileScreen(navController)
+        }
+        composable(Screen.search.routes){
+            HealthChatBotScreen(navController)
         }
 
         composable("prescriptions"){
             DoctorDashBoard(navController)
+        }
+        composable("Exit"){
+            AppHost(navController , startDestination = Screen.WelcomeScreenFirst.routes)
         }
 
 

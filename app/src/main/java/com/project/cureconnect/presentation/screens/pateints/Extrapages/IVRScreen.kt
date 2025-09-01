@@ -2,7 +2,6 @@ package com.project.cureconnect.presentation.screens.pateints.Extrapages
 
 import android.content.Intent
 import android.net.Uri
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -28,33 +27,39 @@ import com.project.cureconnect.R
 fun EmergencyScreenUI(navController: NavController) {
     val context = LocalContext.current
     val emergencyNumber = ApiKeys.emergencynumber
+
     Scaffold(
         topBar = {
             //MainTopBar(navController , )
-        }
-    ) {inn->
-
-
+        },
+        containerColor = MaterialTheme.colorScheme.primary
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(colorResource(R.color.primary_blue_light))
-                .padding(inn),
+                .background(MaterialTheme.colorScheme.primary)
+                .padding(paddingValues)
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Text(
                 text = "🚨 Emergency Assistance",
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
+                style = MaterialTheme.typography.headlineLarge.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = MaterialTheme.colorScheme.onPrimary,
                 textAlign = TextAlign.Center
             )
+
             Spacer(modifier = Modifier.height(20.dp))
+
             Card(
-                shape = RoundedCornerShape(16.dp),
+                shape = MaterialTheme.shapes.large,
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
             ) {
                 Column(
@@ -63,17 +68,21 @@ fun EmergencyScreenUI(navController: NavController) {
                 ) {
                     Text(
                         text = "📞 IVR Emergency Number",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Red,
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = MaterialTheme.colorScheme.error,
                         textAlign = TextAlign.Center
                     )
+
                     Spacer(modifier = Modifier.height(10.dp))
+
                     Text(
                         text = emergencyNumber,
-                        fontSize = 30.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black,
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .clickable {
@@ -83,38 +92,54 @@ fun EmergencyScreenUI(navController: NavController) {
                             }
                             .padding(8.dp)
                     )
+
                     Spacer(modifier = Modifier.height(10.dp))
+
                     Text(
                         text = "Call this number for immediate medical assistance.\n" +
                                 "Follow the IVR instructions to get the required help.",
-                        fontSize = 16.sp,
-                        color = Color.Gray,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
                     )
+
                     Spacer(modifier = Modifier.height(20.dp))
+
                     Button(
                         onClick = {
                             val dialIntent =
                                 Intent(Intent.ACTION_DIAL, Uri.parse("tel:$emergencyNumber"))
                             context.startActivity(dialIntent)
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError
+                        ),
+                        shape = MaterialTheme.shapes.medium
                     ) {
                         Icon(
                             imageVector = Icons.Default.Call,
                             contentDescription = "Call",
-                            tint = Color.White
+                            tint = MaterialTheme.colorScheme.onError
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "Call Now", fontSize = 18.sp, color = Color.White)
+                        Text(
+                            text = "Call Now",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onError
+                        )
                     }
                 }
             }
+
             Spacer(modifier = Modifier.height(30.dp))
+
             Card(
-                shape = RoundedCornerShape(16.dp),
+                shape = MaterialTheme.shapes.large,
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFFDECEC)),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer
+                ),
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
             ) {
                 Column(
@@ -123,19 +148,22 @@ fun EmergencyScreenUI(navController: NavController) {
                 ) {
                     Text(
                         text = "ℹ️ Additional Information",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Red,
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = MaterialTheme.colorScheme.onErrorContainer,
                         textAlign = TextAlign.Center
                     )
+
                     Spacer(modifier = Modifier.height(10.dp))
+
                     Text(
                         text = "- Available 24/7 for emergencies.\n" +
                                 "- Multi-language IVR support.\n" +
                                 "- Connects you to the nearest medical help.\n" +
                                 "- Supports both voice and touch-tone responses.",
-                        fontSize = 16.sp,
-                        color = Color.Black,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
                         textAlign = TextAlign.Center
                     )
                 }

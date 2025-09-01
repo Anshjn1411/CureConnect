@@ -4,6 +4,7 @@ package com.project.cureconnect.presentation.screens.DoctorPanel.NavigationRoute
 
 sealed class Screen(val routes :String) {
     object DoctorDashBoard : Screen("DoctorDashBoard")
+    object WelcomeScreenFirst : Screen("welcome_screen")
     object Telemedicine : Screen("telemedicine")
     object Analysis : Screen("analysis")
     object HealthTips : Screen("health_tips")

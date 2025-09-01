@@ -64,6 +64,7 @@ import com.project.cureconnect.presentation.screens.pateints.MainScreen.Speciali
 import com.project.cureconnect.presentation.screens.pateints.viewmodel.SpeechRecognitionHelper
 import com.project.cureconnect.presentation.screens.pateints.MainScreen.UserFeedbackSection
 import com.project.cureconnect.presentation.navigationRoutes.Screen
+import com.project.cureconnect.ui.theme.SuccessGreen
 import kotlinx.coroutines.delay
 
 
@@ -95,92 +96,51 @@ fun MainDashBoard(navController: NavController ) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { speechHelper.startListening() },
-                containerColor = if(speechHelper.isListening.value){
-                    Color.Green
-                }else{
-                    primaryBlue
-                }
+                containerColor = if (speechHelper.isListening.value)
+                    SuccessGreen else MaterialTheme.colorScheme.primary
             ) {
                 Icon(
                     imageVector = Icons.Default.Mic,
-                    contentDescription = "startVoice assist",
+                    contentDescription = "Voice Assist",
                     tint = Color.White
                 )
             }
         },
-        containerColor = Color.White
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
+
         Column(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
-                .background(Color.White)
+                .background(MaterialTheme.colorScheme.background)
         ) {
+            MainTopBar(navController, speechHelper)
 
-            MainTopBar(navController ,speechHelper)
-
-            // Wrap content in scrollable container
             LazyColumn {
                 item { BannerScreen() }
 
-                // Section title with animation
                 item {
-                    AnimatedVisibility(
-                        visible = isLoaded,
-                        enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
-                                slideInVertically(
-                                    initialOffsetY = { -40 },
-                                    animationSpec = tween(durationMillis = 500)
-                                )
-                    ) {
+                    AnimatedVisibility(visible = isLoaded, enter = fadeIn() + slideInVertically()) {
                         Text(
                             text = stringResource(R.string.our_service),
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.headlineLarge,
                             modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
                         )
                     }
                 }
 
                 item { CardArea(navController) }
-
-                // Specialist Doctors Section
-                item {
-                    SpecialistDoctorsSection(
-                        visible = isLoaded,
-                        navController = navController
-                    )
-                }
-
-                // Health Stats Section
-                item {
-                    HealthStatsSection(
-                        visible = isLoaded
-                    )
-                }
-
-                // User Feedback Section
-                item {
-                    UserFeedbackSection(
-                        visible = isLoaded
-                    )
-                }
-
-                // Health News Section
-                item {
-                    HealthNewsSection(
-                        visible = isLoaded,
-                        navController = navController
-                    )
-                }
-
-                // Bottom spacing
+                item { SpecialistDoctorsSection(visible = isLoaded, navController = navController) }
+                item { HealthStatsSection(visible = isLoaded) }
+                item { UserFeedbackSection(visible = isLoaded) }
+                item { HealthNewsSection(visible = isLoaded, navController = navController) }
                 item { Spacer(modifier = Modifier.height(24.dp)) }
             }
         }
     }
-}
 
+}
 
 @Composable
 fun CardArea(navController: NavController) {
@@ -191,38 +151,31 @@ fun CardArea(navController: NavController) {
         ServiceItem(stringResource(R.string.Consult), "🩺", R.drawable.banner_instant_consultation, Screen.Consult.routes),
         ServiceItem(stringResource(R.string.Emergency), "🚑", R.drawable.banner_emergency, Screen.Emergency.routes),
         ServiceItem(stringResource(R.string.Appointment), "👨‍⚕️", R.drawable.banner_appointment, Screen.Appointment.routes)
-
     )
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(horizontal = 16.dp)
     ) {
-        // First row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            ServiceCard(serviceItems[0], navController, Modifier.weight(0.67f))
-            ServiceCard(serviceItems[1], navController, Modifier.weight(0.67f))
-            ServiceCard(serviceItems[2], navController, Modifier.weight(0.67f))
+        for (i in serviceItems.indices step 3) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                for (j in 0..2) {
+                    if (i + j < serviceItems.size) {
+                        ServiceCard(
+                            service = serviceItems[i + j],
+                            navController = navController,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Second row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-
-            ServiceCard(serviceItems[3], navController, Modifier.weight(0.67f))
-            ServiceCard(serviceItems[4], navController, Modifier.weight(0.67f))
-            ServiceCard(serviceItems[5], navController, Modifier.weight(0.67f))
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 

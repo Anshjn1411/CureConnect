@@ -226,7 +226,7 @@ class AnalysisViewModel :ViewModel() {
 
                 viewModelScope.launch {
                     try {
-                        val apikey = "AIzaSyASSY9fkUZY2Q9cYsCd-mTMK0sr98lPh30"
+                        val apikey = "AIzaSyBtXgRpY5mxrTU4UV9CqGYAQ6j9R3nKe04"
                         val result = response3.uploadImage(apikey , requestBody)
                         Log.d("Retrofit", "Success: $result")
 

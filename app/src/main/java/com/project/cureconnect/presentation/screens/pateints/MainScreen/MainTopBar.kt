@@ -19,6 +19,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -39,19 +40,21 @@ import com.project.cureconnect.changeLanguage
 import com.project.cureconnect.getSavedLanguage
 import com.project.cureconnect.presentation.screens.pateints.viewmodel.SpeechRecognitionHelper
 import com.project.cureconnect.presentation.navigationRoutes.Screen
+import com.project.cureconnect.ui.theme.BottomSheetShape
+import com.project.cureconnect.ui.theme.Elevations
 
-// Step 2: Updated MainTopBar with integrated speech recognition
 @Composable
 fun MainTopBar(navController: NavController, speechHelper: SpeechRecognitionHelper) {
     val context = LocalContext.current
-    val languages = listOf("English", "हिन्दी", "मराठी") // Added Marathi option
+    val languages = listOf("English", "हिन्दी", "मराठी")
     var expanded by remember { mutableStateOf(false) }
     var selectedLanguage by remember { mutableStateOf(getSavedLanguage(context)) }
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = Color.White,
-        shadowElevation = 4.dp
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = Elevations.medium,
+        shape = BottomSheetShape
     ) {
         Row(
             modifier = Modifier
@@ -60,11 +63,11 @@ fun MainTopBar(navController: NavController, speechHelper: SpeechRecognitionHelp
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Logo & App Name
+            // 🔷 Logo & App Name
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(
                     painter = painterResource(R.drawable.cureconnect_logo),
-                    contentDescription = null,
+                    contentDescription = "CureConnect Logo",
                     modifier = Modifier.size(40.dp)
                 )
 
@@ -72,55 +75,64 @@ fun MainTopBar(navController: NavController, speechHelper: SpeechRecognitionHelp
 
                 Text(
                     text = "CureConnect",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = primaryBlue
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
 
-            // Action Icons + Language Selector
+            // ⚙️ Actions: Notification, Emergency, Language
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = { navController.navigate(Screen.MyAppointment.routes) }) {
+                IconButton(onClick = {
+                    navController.navigate(Screen.MyAppointment.routes)
+                }) {
                     Icon(
                         imageVector = Icons.Default.Notifications,
                         contentDescription = "Notifications",
-                        tint = Color.DarkGray
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
-                IconButton(onClick = { navController.navigate("IVR") }) {
+                IconButton(onClick = {
+                    navController.navigate("IVR")
+                }) {
                     Box(
                         modifier = Modifier
                             .size(32.dp)
                             .clip(CircleShape)
-                            .background(lightGrey),
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.EmergencyShare,
-                            contentDescription = "Profile",
-                            tint = Color.DarkGray
+                            contentDescription = "Emergency",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
 
-                // 🌐 Language Selector Button
+                // 🌐 Language Dropdown
                 Box {
                     IconButton(onClick = { expanded = true }) {
                         Icon(
-                            Icons.Default.Language, // Use a globe/language icon
+                            imageVector = Icons.Default.Language,
                             contentDescription = "Select Language",
-                            tint = Color.DarkGray
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
 
                     DropdownMenu(
                         expanded = expanded,
-                        onDismissRequest = { expanded = false }
+                        onDismissRequest = { expanded = false },
+                        modifier = Modifier.background(MaterialTheme.colorScheme.surface)
                     ) {
                         languages.forEach { language ->
                             DropdownMenuItem(
-                                text = { Text(text = language) },
+                                text = {
+                                    Text(
+                                        text = language,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                },
                                 onClick = {
                                     selectedLanguage = language
                                     changeLanguage(
@@ -128,7 +140,7 @@ fun MainTopBar(navController: NavController, speechHelper: SpeechRecognitionHelp
                                         when (language) {
                                             "English" -> "en"
                                             "हिन्दी" -> "hi"
-                                            "मराठी" -> "mr" // Marathi language code
+                                            "मराठी" -> "mr"
                                             else -> "en"
                                         }
                                     )

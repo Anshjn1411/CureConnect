@@ -23,12 +23,17 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -57,7 +62,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.project.cureconnect.R
 import com.project.cureconnect.presentation.screens.AuthScreen.User
-
 import com.project.cureconnect.data.datastore.UserSessionLayer.UserSessionManager
 import com.project.cureconnect.presentation.screens.pateints.MainScreen.MainBottomBar
 import com.project.cureconnect.presentation.navigationRoutes.Screen
@@ -66,10 +70,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HealthChatBotScreen(navController: NavController, viewModel: HealthChatBotViewModel = viewModel() ) {
+fun HealthChatBotScreen(navController: NavController, viewModel: HealthChatBotViewModel = viewModel()) {
     val messages by viewModel.messages.collectAsState()
     var messageInput by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
@@ -110,15 +113,16 @@ fun HealthChatBotScreen(navController: NavController, viewModel: HealthChatBotVi
                             modifier = Modifier
                                 .size(40.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFF4285F4))
+                                .background(MaterialTheme.colorScheme.primary)
                                 .padding(8.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = "H",
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold
+                                )
                             )
                         }
 
@@ -127,33 +131,33 @@ fun HealthChatBotScreen(navController: NavController, viewModel: HealthChatBotVi
                         Column {
                             Text(
                                 text = "HealthBot",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = Color.Black
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 text = "Online",
-                                fontSize = 12.sp,
-                                color = Color(0xFF4CAF50)
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.tertiary
                             )
                         }
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigate(Screen.MainDashBoard.routes) }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
+
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface
                 )
             )
         },
-        bottomBar = { MainBottomBar(navController = navController , selectedItem = selectedItem){index->
-            selectedItem =index
-
-        } },
-        containerColor = Color(0xFFF5F7FA)
+        bottomBar = {
+            MainBottomBar(navController = navController, selectedItem = selectedItem) { index ->
+                selectedItem = index
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -185,7 +189,7 @@ fun HealthChatBotScreen(navController: NavController, viewModel: HealthChatBotVi
             // Input area
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                color = Color.White,
+                color = MaterialTheme.colorScheme.surface,
                 shadowElevation = 8.dp
             ) {
                 Row(
@@ -200,13 +204,26 @@ fun HealthChatBotScreen(navController: NavController, viewModel: HealthChatBotVi
                         modifier = Modifier
                             .weight(1f)
                             .height(56.dp),
-                        placeholder = { Text("Type your health question...") },
-                        shape = RoundedCornerShape(28.dp),
-
+                        placeholder = {
+                            Text(
+                                "Type your health question...",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        },
+                        shape = MaterialTheme.shapes.extraLarge,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface
+                        ),
+                        textStyle = MaterialTheme.typography.bodyMedium,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
                         keyboardActions = KeyboardActions(
                             onSend = {
-                                viewModel.sendMessage(context , messageInput, userModel)
+                                viewModel.sendMessage(context, messageInput, userModel)
                                 messageInput = ""
                                 focusManager.clearFocus()
                             }
@@ -216,22 +233,27 @@ fun HealthChatBotScreen(navController: NavController, viewModel: HealthChatBotVi
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    IconButton(
-                        onClick = {
-                            viewModel.sendMessage(context,messageInput , userModel)
-                            messageInput = ""
-                            focusManager.clearFocus()
-                        },
+                    Surface(
                         modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFF4285F4))
+                            .size(48.dp),
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.primary
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Send,
-                            contentDescription = "Send",
-                            tint = Color.White
-                        )
+                        IconButton(
+                            onClick = {
+                                viewModel.sendMessage(context, messageInput, userModel)
+                                messageInput = ""
+                                focusManager.clearFocus()
+                            },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Send,
+                                contentDescription = "Send"
+                            )
+                        }
                     }
                 }
             }
@@ -250,8 +272,8 @@ fun ChatBubble(message: ChatMessage) {
             val formattedTime = SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date(message.timestamp))
             Text(
                 text = formattedTime,
-                fontSize = 12.sp,
-                color = Color.Gray,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 4.dp)
             )
         }
@@ -266,7 +288,11 @@ fun ChatBubble(message: ChatMessage) {
                 bottomEnd = 16.dp
             ),
             colors = CardDefaults.cardColors(
-                containerColor = if (message.isFromBot) Color.White else Color(0xFF4285F4)
+                containerColor = if (message.isFromBot) {
+                    MaterialTheme.colorScheme.surface
+                } else {
+                    MaterialTheme.colorScheme.primary
+                }
             ),
             elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
         ) {
@@ -279,16 +305,17 @@ fun ChatBubble(message: ChatMessage) {
                         modifier = Modifier
                             .size(32.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFE3F2FD))
+                            .background(MaterialTheme.colorScheme.primaryContainer)
                             .padding(6.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = "H",
-                            color = Color(0xFF4285F4),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp,
-                             fontFamily = comic
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = comic
+                            )
                         )
                     }
 
@@ -297,9 +324,14 @@ fun ChatBubble(message: ChatMessage) {
 
                 Text(
                     text = message.content,
-                    color = if (message.isFromBot) Color.DarkGray else Color.White,
-                    fontSize = 15.sp,
-                    fontFamily = comic
+                    color = if (message.isFromBot) {
+                        MaterialTheme.colorScheme.onSurface
+                    } else {
+                        MaterialTheme.colorScheme.onPrimary
+                    },
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontFamily = comic
+                    )
                 )
             }
         }
@@ -309,120 +341,12 @@ fun ChatBubble(message: ChatMessage) {
             val formattedTime = SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date(message.timestamp))
             Text(
                 text = formattedTime,
-                fontSize = 12.sp,
-                color = Color.Gray,
-                modifier = Modifier.padding(top = 4.dp),
-                fontFamily = comic
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontFamily = comic
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp)
             )
         }
-    }
-}
-
-
-@Composable
-fun HealthChatBotWelcomeScreen(navController: NavController) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .size(120.dp)
-                .clip(CircleShape)
-                .background(Color(0xFFE3F2FD)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "H",
-                color = Color(0xFF4285F4),
-                fontWeight = FontWeight.Bold,
-                fontSize = 48.sp
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            text = "HealthBot",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF4285F4)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Your personal healthcare assistant",
-            fontSize = 16.sp,
-            color = Color.Gray,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F7FA)),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                FeatureItem("Get quick answers to health questions")
-                FeatureItem("Learn about symptoms and treatments")
-                FeatureItem("Find health tips and recommendations")
-                FeatureItem("Available 24/7 for your health concerns")
-            }
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        androidx.compose.material3.Button(
-            onClick = { navController.navigate("health_chatbot") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            shape = RoundedCornerShape(28.dp),
-            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF4285F4)
-            )
-        ) {
-            Text("Start Chatting", fontSize = 16.sp)
-        }
-    }
-}
-
-@Composable
-fun FeatureItem(text: String) {
-    Row(
-        modifier = Modifier.padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .size(24.dp)
-                .clip(CircleShape)
-                .background(Color(0xFF4285F4)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_check),  // Replace with your check icon
-                contentDescription = "Feature",
-                tint = Color.White,
-                modifier = Modifier.size(16.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        Text(
-            text = text,
-            fontSize = 15.sp,
-            color = Color.DarkGray
-        )
     }
 }

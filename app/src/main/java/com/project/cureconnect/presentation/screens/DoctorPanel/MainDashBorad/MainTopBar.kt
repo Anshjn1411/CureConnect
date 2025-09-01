@@ -22,6 +22,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.project.cureconnect.R
 import com.project.cureconnect.lightGrey
+import com.project.cureconnect.presentation.screens.DoctorPanel.NavigationRoutesDoctor.Screen
 import com.project.cureconnect.primaryBlue
 
 @Composable
@@ -42,6 +47,8 @@ fun DoctorMainTopBar(navController: NavController) {
         color = Color.White,
         shadowElevation = 4.dp
     ) {
+        var showDialog by remember { mutableStateOf(false) }
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -67,7 +74,7 @@ fun DoctorMainTopBar(navController: NavController) {
             }
 
             Row {
-                IconButton(onClick = { navController.navigate("doctor_appoinmenet/${5}") }) {
+                IconButton(onClick = { showDialog=true }) {
                     BadgedBox(
                         badge = {
                             Badge(
@@ -89,7 +96,7 @@ fun DoctorMainTopBar(navController: NavController) {
                     }
                 }
 
-                IconButton(onClick = { navController.navigate("doctor_profile") }) {
+                IconButton(onClick = { navController.navigate(Screen.profile.routes) }) {
                     Box(
                         modifier = Modifier
                             .size(32.dp)
@@ -105,6 +112,10 @@ fun DoctorMainTopBar(navController: NavController) {
                     }
                 }
             }
+            UnderDevelopmentDialog(
+                showDialog = showDialog,
+                onDismiss = { showDialog = false }
+            )
         }
     }
 }

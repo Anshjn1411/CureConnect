@@ -3,6 +3,7 @@ package com.project.cureconnect.presentation.navigationRoutes
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -24,6 +25,7 @@ import com.project.cureconnect.presentation.screens.AuthScreen.SignUpScreen
 import com.project.cureconnect.data.datastore.UserSessionLayer.CachedUser
 
 import com.project.cureconnect.data.datastore.UserSessionLayer.UserSessionManager
+import com.project.cureconnect.patients.cardScreens.consult.ChatScreen
 import com.project.cureconnect.presentation.screens.AuthScreen.DoctorAuthViewModel
 import com.project.cureconnect.presentation.screens.pateints.CardScreen.analysis.AnalysisScreen
 import com.project.cureconnect.presentation.screens.pateints.CardScreen.analysis.MedicalAnalysisDashboard
@@ -52,12 +54,15 @@ import com.project.cureconnect.presentation.startpages.WelcomeScreenD3
 
 import com.project.cureconnect.presentation.startpages.WelcomeScreenFirst
 import com.project.cureconnect.presentation.startpages.WelcomeScreenSecond
-import com.project.cureconnect.presentation.startpages.WelcomeScreenThird
+
 import com.project.cureconnect.patients.cardScreens.telemedicines.telemedicineScreen
 
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
-fun AppHost(navController: NavHostController) {
+fun AppHost(
+    navController: NavHostController,
+    startDestination: String
+) {
     val context = LocalContext.current
     val sessionManager = remember { UserSessionManager(context) }
     var cachedUser by remember { mutableStateOf<CachedUser?>(null) }
@@ -88,14 +93,7 @@ fun AppHost(navController: NavHostController) {
     )
 
 
-    NavHost(navController = navController, startDestination = Screen.SplashScreen.routes) {
-
-        // Splash
-        composable(Screen.SplashScreen.routes) {
-            SplashScreen(navController = navController, authViewModel = authViewModel)
-        }
-
-        // Welcome Screens
+    NavHost(navController = navController, startDestination = startDestination) {
         composable(Screen.WelcomeScreen1.routes) {
             WelcomeScreenFirst(navController)
         }
@@ -103,7 +101,7 @@ fun AppHost(navController: NavHostController) {
             WelcomeScreenSecond(navController)
         }
         composable(Screen.WelcomeScreen3.routes) {
-            WelcomeScreenThird(navController , authViewModel)
+            SignUpScreen(navController , authViewModel)
         }
         // Welcome Screens
         composable(Screen.WelcomeScreenD3.routes) {
@@ -118,10 +116,10 @@ fun AppHost(navController: NavHostController) {
 
         // Authentication
         composable(Screen.SignUp.routes) {
-            SignUpScreen(navController = navController)
+            SignUpScreen(navController = navController , authViewModel)
         }
         composable(Screen.Login.routes) {
-            LoginScreen(navController = navController)
+            LoginScreen(navController = navController , authViewModel)
         }
 
         // Dashboard & Main
@@ -150,7 +148,7 @@ fun AppHost(navController: NavHostController) {
             val doctorFromCache = appoinmenetViewModel.getDoctorById(doctorId)
 
             if (doctorFromCache != null) {
-                DoctorDetailsScreen(doctor = doctorFromCache, navController = navController)
+                DoctorDetailsScreen(doctor = doctorFromCache, navController = navController , appoinmenetViewModel)
             } else {
                 LaunchedEffect(Unit) {
                     appoinmenetViewModel.fetchDoctorByIdFromFirestore(doctorId) { doctor ->
@@ -212,18 +210,25 @@ fun AppHost(navController: NavHostController) {
 
 
 
-//        composable("chat_screen/{doctorId}") { backStackEntry ->
-//            val doctorId = backStackEntry.arguments?.getString("doctorId")
-//            val doctor = sampleDoctors.sampleDoctors.find { it.id.toString() == doctorId }
-//
-//            if (doctor != null) {
-//                ChatScreen(navController= navController,doctorId = doctor.id , userId = cachedUser?.uid.toString())
-//            } else {
-//                Text("Doctor not found")
-//            }
-//        }
+        composable("chat_screen/{doctorId}") { backStackEntry ->
+            val doctorId = backStackEntry.arguments?.getString("doctorId")
+            val userId = cachedUser?.uid.orEmpty()
+
+            // If you already have doctor data passed or stored elsewhere
+            doctorId?.let {
+                ChatScreen(
+                    navController = navController,
+                    doctorId = it,
+                    userId = userId
+                )
+            } ?: run {
+                // Optional fallback UI
+                Text("Invalid doctor ID")
+            }
+        }
+
         composable(Screen.Consult.routes){
-            consult(navController)
+            consult(navController , appoinmenetViewModel)
 
         }
 

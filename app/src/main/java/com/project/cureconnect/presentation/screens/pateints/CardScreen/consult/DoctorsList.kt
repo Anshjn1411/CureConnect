@@ -1,6 +1,8 @@
 package com.project.cureconnect.presentation.screens.pateints.CardScreen.consult
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -9,9 +11,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -22,64 +27,89 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.project.cureconnect.presentation.screens.pateints.CardScreen.appoinmenet.Doctor
 import com.project.cureconnect.presentation.screens.pateints.CardScreen.appoinmenet.DoctorCard
-
-
 import com.project.cureconnect.presentation.navigationRoutes.Screen
+import com.project.cureconnect.presentation.screens.pateints.CardScreen.appoinmenet.AppoinmenetViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DoctorList(navController: NavController) {
-    var selectedItem by remember { mutableStateOf(2) }
+fun DoctorList(navController: NavController , viewModel: AppoinmenetViewModel) {
     var doctors by remember { mutableStateOf<List<Doctor>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
 
-//    LaunchedEffect(Unit) {
-//        doctors = sampleDoctors.sampleDoctors
-//    }
+    LaunchedEffect(Unit) {
+        viewModel.fetchDoctorsFromFirestore { fetchedDoctors ->
+            doctors = fetchedDoctors
+            Log.d("DoctorFetch", "Fetched: ${fetchedDoctors.size}")
+            if (fetchedDoctors.isNotEmpty()) {
+                Log.d("DoctorFetch", "First doctor: ${fetchedDoctors[0].name}")
+            }
+            isLoading = false
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {  Text("Nearby Doctor",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold , color = Color.Black
-                    , modifier = Modifier.padding(start = 80.dp)) },
+                title = {
+                    Text(
+                        text = "Top Doctors",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(start = 80.dp)
+                    )
+                },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp()}) {
+                    IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = "Back",
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             )
         },
-
-
-        containerColor = Color.White
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(doctors) { doctor ->
-                DoctorCard(
-                    doctor = doctor,
-                    onDoctorClick = { navController.navigate("chat_screen/${doctor.uid}") }
-                )
-                Spacer(Modifier.height(15.dp))
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(doctors) { doctor ->
+                    DoctorCard(
+                        doctor = doctor,
+                        onDoctorClick = {
+                            navController.navigate("chat_screen/${doctor.uid}")
+                        }
+                    )
+                    Spacer(Modifier.height(15.dp))
+                }
             }
         }
     }

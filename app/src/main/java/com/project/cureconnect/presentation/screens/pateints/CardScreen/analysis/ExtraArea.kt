@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
@@ -32,67 +32,53 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 @Composable
 fun ExtraArea(navController: NavController) {
-    var isDarkMode by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-
-    val backgroundColor = if (isDarkMode) Color(0xFF121212) else Color(0xFFF5F5F5)
-    val textColor = if (isDarkMode) Color.White else Color.Black
-    val cardColor = if (isDarkMode) Color(0xFF1E1E1E) else Color.White
     // Header Section
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Theme Toggle
+        // Back Button
         IconButton(onClick = { navController.navigateUp() }) {
             Icon(
                 Icons.Default.ArrowBack,
-                contentDescription = null
+                contentDescription = "Navigate back",
+                tint = MaterialTheme.colorScheme.onBackground
             )
         }
         Spacer(Modifier.width(50.dp))
         Text(
             text = "Model Analysis",
-            style = MaterialTheme.typography.headlineMedium.copy(
-                fontWeight = FontWeight.Bold,
-                color = textColor
-            )
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.onBackground
         )
-
-
     }
 
     Spacer(modifier = Modifier.height(24.dp))
 }
 
-
 @Composable
 fun ExtraArea2(navController: NavController) {
-    var isDarkMode by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-
-    val backgroundColor = if (isDarkMode) Color(0xFF121212) else Color(0xFFF5F5F5)
-    val textColor = if (isDarkMode) Color.White else Color.Black
-    val cardColor = if (isDarkMode) Color(0xFF1E1E1E) else Color.White
     // Accuracy KPI Card
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(100.dp),
-        colors = CardDefaults.cardColors(containerColor = cardColor),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = RoundedCornerShape(16.dp)
+        shape = MaterialTheme.shapes.large
     ) {
         Row(
             modifier = Modifier
@@ -105,29 +91,27 @@ fun ExtraArea2(navController: NavController) {
                 Text(
                     text = "Model Accuracy",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = textColor.copy(alpha = 0.7f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Text(
                     text = "90%-95%",
-                    style = MaterialTheme.typography.headlineLarge.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = textColor
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
 
             Box(
                 modifier = Modifier
                     .size(48.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.Blue.copy(alpha = if (isDarkMode) 0.2f else 0.1f)),
+                    .clip(MaterialTheme.shapes.medium)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = null,
-                    tint = Color.Blue,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(28.dp)
                 )
             }
@@ -141,9 +125,11 @@ fun ExtraArea2(navController: NavController) {
         modifier = Modifier
             .fillMaxWidth()
             .height(220.dp),
-        colors = CardDefaults.cardColors(containerColor = cardColor),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = RoundedCornerShape(16.dp)
+        shape = MaterialTheme.shapes.large
     ) {
         Column(
             modifier = Modifier
@@ -158,21 +144,23 @@ fun ExtraArea2(navController: NavController) {
                 Text(
                     text = "Accuracy Trends",
                     style = MaterialTheme.typography.titleMedium,
-                    color = textColor,
-                    fontWeight = FontWeight.Bold
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
                             .size(10.dp)
-                            .background(Color.Blue, shape = RoundedCornerShape(2.dp))
+                            .background(
+                                MaterialTheme.colorScheme.primary,
+                                shape = MaterialTheme.shapes.extraSmall
+                            )
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "Accuracy",
                         style = MaterialTheme.typography.bodySmall,
-                        color = textColor.copy(alpha = 0.7f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -183,23 +171,18 @@ fun ExtraArea2(navController: NavController) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(if (isDarkMode) Color(0xFF2A2A2A) else Color(0xFFF0F0F0)),
+                    .clip(MaterialTheme.shapes.medium)
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
-                AccuracyChart(isDarkMode = isDarkMode)
+                AccuracyChart()
             }
         }
     }
-
 }
 
-
-
 @Composable
-fun AccuracyChart(isDarkMode: Boolean) {
-    val lineColor = if (isDarkMode) Color.White.copy(alpha = 0.8f) else Color.Black.copy(alpha = 0.8f)
-
+fun AccuracyChart() {
     Column(modifier = Modifier.fillMaxSize()) {
         // Graph area
         Box(
@@ -217,17 +200,17 @@ fun AccuracyChart(isDarkMode: Boolean) {
                 Text(
                     text = "100%",
                     style = MaterialTheme.typography.bodySmall,
-                    color = lineColor.copy(alpha = 0.7f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = "95%",
                     style = MaterialTheme.typography.bodySmall,
-                    color = lineColor.copy(alpha = 0.7f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = "90%",
                     style = MaterialTheme.typography.bodySmall,
-                    color = lineColor.copy(alpha = 0.7f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -246,21 +229,29 @@ fun AccuracyChart(isDarkMode: Boolean) {
                 accuracyPoints.forEachIndexed { index, accuracy ->
                     // Normalize to chart height (90-100% range)
                     val normalizedHeight = (accuracy - 90f) / 10f
-                    val animatedHeight by animateFloatAsState(targetValue = normalizedHeight)
+                    val animatedHeight by animateFloatAsState(
+                        targetValue = normalizedHeight,
+                        label = "accuracy_animation_$index"
+                    )
 
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Box(
                             modifier = Modifier
                                 .width(30.dp)
                                 .height((animatedHeight * 120).dp)
-                                .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
-                                .background(Color.Blue.copy(alpha = if (isDarkMode) 0.7f else 0.5f))
+                                .clip(
+                                    MaterialTheme.shapes.extraSmall.copy(
+                                        bottomStart = androidx.compose.foundation.shape.CornerSize(0.dp),
+                                        bottomEnd = androidx.compose.foundation.shape.CornerSize(0.dp)
+                                    )
+                                )
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "${accuracy}%",
                             style = MaterialTheme.typography.bodySmall,
-                            color = lineColor.copy(alpha = 0.7f)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -280,7 +271,7 @@ fun AccuracyChart(isDarkMode: Boolean) {
                 Text(
                     text = month,
                     style = MaterialTheme.typography.bodySmall,
-                    color = lineColor.copy(alpha = 0.7f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.json.JSONObject
-class PaymentViewModel : ViewModel(), PaymentResultListener {
+open class PaymentViewModel : ViewModel(), PaymentResultListener {
     private val _paymentStatus = MutableStateFlow<PaymentStatus>(PaymentStatus.Initial)
     val paymentStatus = _paymentStatus.asStateFlow()
 
@@ -21,7 +21,7 @@ class PaymentViewModel : ViewModel(), PaymentResultListener {
     private var currentDoctor: Doctor? = null
     private var currentActivity: ComponentActivity? = null
 
-    fun initiatePayment(
+    open fun initiatePayment(
         activity: ComponentActivity,
         appointment: Appointment,
         doctor: Doctor,

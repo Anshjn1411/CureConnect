@@ -12,6 +12,10 @@ import androidx.compose.material3.NavigationBarItem
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -22,6 +26,8 @@ import com.project.cureconnect.presentation.screens.DoctorPanel.NavigationRoutes
 
 @Composable
 fun MainBottomBar(selectedItem: Int, navController: NavController, onItemSelected: (Int) -> Unit) {
+    var showDialog by remember { mutableStateOf(false) }
+
     NavigationBar(
         containerColor = Color.White,
         contentColor = primaryBlue,
@@ -50,10 +56,14 @@ fun MainBottomBar(selectedItem: Int, navController: NavController, onItemSelecte
                     when (index) {
                         0 -> navController.navigate(Screen.DoctorDashBoard.routes)
                         1 -> navController.navigate(Screen.search.routes)
-                        2 -> navController.navigate(Screen.Appointment.routes)
+                        2 -> showDialog = true
                         3 -> navController.navigate(Screen.profile.routes)
                     }
                 }
+            )
+            UnderDevelopmentDialog(
+                showDialog = showDialog,
+                onDismiss = { showDialog = false }
             )
         }
     }

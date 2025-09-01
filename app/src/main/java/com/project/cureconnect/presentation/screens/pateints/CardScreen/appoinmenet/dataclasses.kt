@@ -31,5 +31,5 @@ data class Appointment(
     val date: String= "",
     val time: String= "",
     var status: String= "" ,
-    val patientHistoryRecord: List<PatientHistoryRecord?> = emptyList()// "Scheduled", "Completed", "Cancelled"
+    val patientHistoryRecord: List<PatientHistoryRecord?> = emptyList()
 )
