@@ -15,30 +15,30 @@ CureConnect is a next-gen AI-powered telemedicine platform designed to bring acc
 
 ### 2. Offline Doctor Chat with WebSockets 🔒
 
-![Secure Messaging](app/src/main/res/drawable/chat.png)
+![Secure Messaging](app/src/main/res/drawable/chat.webp)
 
 - Patients can send messages to doctors even with no internet connectivity.
 - Uses WebSockets for real-time, lightweight, and encrypted chat, reducing dependency on high-speed internet.
 
 ### 3.  AI/ML-Based Diagnostics 🩺
 
-![Medical Analysis](app/src/main/res/drawable/analysis.png)
+![Medical Analysis](app/src/main/res/drawable/analysis.webp)
 
 - Uses CNN & LSTM algorithms to analyze ECG, X-ray, Retinopathy, PET scans, Skin diseases, and Alzheimer’s.
 - Provides instant AI-generated reports, reducing diagnostic delays in rural areas.
 
 ### 4. RAG-Powered AI Chatbot 🤖
 
-![Chatbot](app/src/main/res/drawable/bot.png)
-![Health Tips](app/src/main/res/drawable/ht.png)
+![Chatbot](app/src/main/res/drawable/bot.webp)
+![Health Tips](app/src/main/res/drawable/ht.webp)
 
 - Uses Retrieval-Augmented Generation (RAG) to provide context-aware, accurate health responses.
 - Patients can get personalized health tips, symptom checks, and self-care advice in multiple languages.
 
 ### 5.Appointment Booking System 💳📝
 
-![doctors](app/src/main/res/drawable/doctors.png)
-![Appointment](app/src/main/res/drawable/appointment.png)
+![doctors](app/src/main/res/drawable/doctors.webp)
+![Appointment](app/src/main/res/drawable/appointment.webp)
 
 - Patients can schedule consultations with doctors, ensuring timely medical assistance.
 - Integrated with a secure payment gateway for hassle-free online payments.
