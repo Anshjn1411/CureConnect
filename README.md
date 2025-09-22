@@ -1,6 +1,6 @@
 # CureConnect - AI Powered Low-Bandwidth Telemedicine Platform for Rural Areas
 
-![CureConnect Logo](app/src/main/res/drawable/dashboard.png)
+![CureConnect Logo](app/src/main/res/drawable/dashboard.webp)
 
 ## About CureConnect
 
